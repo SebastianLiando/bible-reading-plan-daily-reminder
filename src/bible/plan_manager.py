@@ -1,28 +1,61 @@
 from typing import List
 from datetime import date, datetime
-from time import strptime
+from time import strftime, strptime
 
+from google.cloud.firestore_v1.base_document import DocumentSnapshot
+
+DATE_FORMAT = '%d-%b-%y'
 
 # Data class that contains information about the reading task for a particular day.
+
+
 class ReadingTask:
-    def __init__(self, book, chapter, start_verse, end_verse) -> None:
-        self.book: str = book
-        self.chapter: str = chapter
-        self.start_verse: int = start_verse
-        self.end_verse: int = end_verse
+    def __init__(self, book: str, chapter: int, start_verse: int, end_verse: int, date: date) -> None:
+        self.book = book
+        self.chapter = chapter
+        self.start_verse = start_verse
+        self.end_verse = end_verse
+        self.date = date
+
+    def to_dict(self) -> dict:
+        return {
+            'book': self.book,
+            'chapter': self.chapter,
+            'start_verse': self.start_verse,
+            'end_verse': self.end_verse,
+            'date': to_csv_date(self.date)
+        }
+
+    @staticmethod
+    def from_doc(doc: DocumentSnapshot):
+        """Create a ReadingTask object from firestore document.
+
+        Args:
+            doc (DocumentSnapshot): The firestore document.
+
+        Returns:
+            ReadingTask: the reading task.
+        """
+        content = doc.to_dict()
+
+        return ReadingTask(
+            content['book'],
+            content['chapter'],
+            content['start_verse'],
+            content['end_verse'],
+            parse_csv_date(content['date'])
+        )
 
     def __str__(self) -> str:
-        parts = [
-            f'book: {self.book}',
-            f'chapter: {self.chapter}',
-            f'start_verse: {self.start_verse}',
-            f'end_verse: {self.end_verse}'
-        ]
-        return f"({', '.join(parts)})"
+        return str(self.to_dict())
+
+
+def to_csv_date(date: date) -> str:
+    return strftime(DATE_FORMAT, date.timetuple())
 
 
 def parse_csv_date(date_str: str) -> date:
-    parsed_date = strptime(date_str, '%d-%b-%y')
+    parsed_date = strptime(date_str, DATE_FORMAT)
 
     return datetime(
         year=parsed_date.tm_year,
@@ -42,7 +75,7 @@ class PlanManager:
             book = plan[1]
 
             # Chapter number
-            chapter = plan[2]
+            chapter = int(plan[2])
 
             # Verse range
             # If both are empty string -> all the verse
@@ -50,7 +83,7 @@ class PlanManager:
             end_verse = 1000 if plan[4] == '' else int(plan[4])
 
             self.reading_tasks[plan_date] = ReadingTask(
-                book, chapter, start_verse, end_verse
+                book, chapter, start_verse, end_verse, plan_date
             )
 
     def get_task_at(self, date: date) -> ReadingTask:
