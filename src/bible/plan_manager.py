@@ -6,9 +6,37 @@ from google.cloud.firestore_v1.base_document import DocumentSnapshot
 
 DATE_FORMAT = '%d-%b-%y'
 
+
+def to_csv_date(date: date) -> str:
+    """Converts date to the date format in the CSV.
+
+    Args:
+        date (date): The date to con
+
+    Returns:
+        str: The formatted date.
+    """
+    return strftime(DATE_FORMAT, date.timetuple())
+
+
+def parse_csv_date(date_str: str) -> date:
+    """Parse the string into a date object. The string must follow the format in the CSV (e.g. 18-Sep-21).
+
+    Args:
+        date_str (str): The date string.
+
+    Returns:
+        date: The date object.
+    """
+    parsed_date = strptime(date_str, DATE_FORMAT)
+
+    return datetime(
+        year=parsed_date.tm_year,
+        month=parsed_date.tm_mon,
+        day=parsed_date.tm_mday).date()
+
+
 # Data class that contains information about the reading task for a particular day.
-
-
 class ReadingTask:
     def __init__(self, book: str, chapter: int, start_verse: int, end_verse: int, date: date) -> None:
         self.book = book
@@ -50,19 +78,6 @@ class ReadingTask:
         return str(self.to_dict())
 
 
-def to_csv_date(date: date) -> str:
-    return strftime(DATE_FORMAT, date.timetuple())
-
-
-def parse_csv_date(date_str: str) -> date:
-    parsed_date = strptime(date_str, DATE_FORMAT)
-
-    return datetime(
-        year=parsed_date.tm_year,
-        month=parsed_date.tm_mon,
-        day=parsed_date.tm_mday).date()
-
-
 class PlanManager:
     def __init__(self, plans: List[List[str]]) -> None:
         self.reading_tasks = {}
@@ -98,3 +113,11 @@ class PlanManager:
         '''
         current_date = datetime.now().date()
         return self.get_task_at(current_date)
+
+    def get_tasks(self) -> List[ReadingTask]:
+        """Returns all reading tasks.
+
+        Returns:
+            List[ReadingTask]: All reading tasks.
+        """
+        return list(self.reading_tasks.values())
