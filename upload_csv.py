@@ -1,6 +1,6 @@
-from src.assets import get_asset
-from src.bible.plan_manager import PlanManager
-from src.data.plan_repository import PlanRepository
+from assets import get_asset
+from bible.plan_manager import PlanManager
+from data.plan_repository import PlanRepository
 from google.cloud import firestore
 
 import csv

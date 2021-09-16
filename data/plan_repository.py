@@ -4,7 +4,7 @@ from google.cloud import firestore
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
 from google.cloud.firestore_v1.document import DocumentReference
 
-from src.bible.plan_manager import ReadingTask, to_csv_date
+from bible.plan_manager import ReadingTask, to_csv_date
 
 
 class PlanRepository:
