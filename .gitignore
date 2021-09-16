@@ -123,3 +123,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Secret
+firebase-admin-sdk.json
+
+# Reading plan
+plan.csv
