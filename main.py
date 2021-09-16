@@ -114,7 +114,9 @@ def main():
     verses = beautify_verses(today_verses)
 
     # Which chapter and book the verses are from
-    reading_chapter = f'📚<b>{task_today.book.upper()} {task_today.chapter} (NIV84)</b>📚'
+    start_verse_no = 1 if task_today.start_verse == -1 else task_today.start_verse
+    end_verse_no = start_verse_no + len(today_verses) - 1
+    reading_chapter = f'📚<b>{task_today.book.upper()} {task_today.chapter}:{start_verse_no}-{end_verse_no} (NIV84)</b>📚'
 
     # The message lines to be sent.
     message_lines = [
