@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from typing import List, Optional, Set
 from google.cloud import firestore
 from src.bible.plan_manager import ReadingTask
@@ -11,6 +11,15 @@ from src.utils import get_superscript
 import telegram
 
 
+def get_date_today() -> date:
+    """Return today's date. The timezone is based on the system region.
+
+    Returns:
+        date: The date of today.
+    """
+    return datetime.now().date()
+
+
 def get_today_reading_plan(db: firestore.Client) -> Optional[ReadingTask]:
     """Returns the reading plan for today if any from firestore.
 
@@ -21,7 +30,7 @@ def get_today_reading_plan(db: firestore.Client) -> Optional[ReadingTask]:
         Optional[ReadingTask]: The reading plan, or None if it does not exist.
     """
     # Get today's date
-    today_date = datetime.now().date()
+    today_date = get_date_today()
 
     # Query today's plan from the database
     plan_repo = PlanRepository(db)
