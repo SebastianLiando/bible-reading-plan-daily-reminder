@@ -1,12 +1,12 @@
 from datetime import date, datetime
 from typing import List, Optional, Set
 from google.cloud import firestore
-from src.bible.plan_manager import ReadingTask
-from src.data.plan_repository import PlanRepository
-from src.data.subscriber_repository import SubscriberRepository
-from src.bible.bible import Bible
-from src.token import TOKEN
-from src.utils import get_superscript
+from bible.plan_manager import ReadingTask
+from data.plan_repository import PlanRepository
+from data.subscriber_repository import SubscriberRepository
+from bible.bible import Bible
+from bot_token import TOKEN
+from utils import get_superscript
 
 import telegram
 

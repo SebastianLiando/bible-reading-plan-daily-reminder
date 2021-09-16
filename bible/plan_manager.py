@@ -2,7 +2,7 @@ from typing import List
 from datetime import date, datetime
 from time import strftime, strptime
 
-from google.cloud.firestore_v1.base_document import DocumentSnapshot
+from google.cloud.firestore import DocumentSnapshot
 
 DATE_FORMAT = '%d-%b-%y'
 
