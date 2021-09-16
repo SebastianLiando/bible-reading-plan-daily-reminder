@@ -1,68 +1,142 @@
 from datetime import datetime
-from src.assets import get_asset
-from src.bible import Bible, PlanManager
+from typing import List, Optional, Set
+from google.cloud import firestore
+from src.bible.plan_manager import ReadingTask
+from src.data.plan_repository import PlanRepository
+from src.data.subscriber_repository import SubscriberRepository
+from src.bible.bible import Bible
 from src.token import TOKEN
+from src.utils import get_superscript
 
 import telegram
 
-import csv
 
-from src.utils import get_superscript
+def get_today_reading_plan(db: firestore.Client) -> Optional[ReadingTask]:
+    """Returns the reading plan for today if any from firestore.
 
-def main():   
-    # Read reading plan data.
-    rows = []
-    with open(get_asset('plan.csv')) as file:
-        reader = csv.reader(file)
+    Args:
+        db (firestore.Client): The database client.
 
-        # Exclude header
-        rows = list(reader)[1:]
-    plan_manager = PlanManager(rows)
+    Returns:
+        Optional[ReadingTask]: The reading plan, or None if it does not exist.
+    """
+    # Get today's date
+    today_date = datetime.now().date()
 
-    # Get today's reading plan.
-    task_today = plan_manager.get_task_at(datetime.now().date())
+    # Query today's plan from the database
+    plan_repo = PlanRepository(db)
+    return plan_repo.get_plan_at(today_date)
 
-    if task_today is None:
-        return
 
-    # Prepare Bible.
-    bible = Bible()
+def get_verses_from_reading_task(bible: Bible, task_today: ReadingTask) -> List[str]:
+    """Returns the Bible verses from a `ReadingTask` object.
 
-    # Get verses for today.
-    today_verses = bible.get_verses_from_chapter(
+    Args:
+        bible (Bible): The Bible.
+        task_today (ReadingTask): The reading task for today.
+
+    Returns:
+        List[str]: The Bible verses.
+    """
+    return bible.get_verses_from_chapter(
         task_today.book,
         task_today.chapter,
         task_today.start_verse,
         task_today.end_verse
     )
 
+
+def beautify_verses(verses: List[str], separator: str = '\n') -> str:
+    """Formats the Bible verses. This adds the verse number before the verse, and then separate
+    the verses using the separator.
+
+    Args:
+        verses (List[str]): The Bible verses.
+        separator (str, optional): The separator between verses. Defaults to '\n'.
+
+    Returns:
+        str: The neatly formatted Bible verses.
+    """
+    result = ['' for _ in range(len(verses))]
+
     # Add the verse numbers to each verse.
-    for i in range(0, len(today_verses)):
+    for i in range(0, len(verses)):
         verse_no = get_superscript(i + 1)
 
-        today_verses[i] = f"{verse_no} {today_verses[i]}"
+        result[i] = f"{verse_no} {verses[i]}"
+
+    # Join to a single string
+    return separator.join(result)
+
+
+def get_subscribers(db: firestore.Client) -> Set[str]:
+    """Returns subscriber ids from firestore.
+
+    Args:
+        db (firestore.Client): The firestore client.
+
+    Returns:
+        Set[str]: Subscribers' telegram chat ids.
+    """
+    repo = SubscriberRepository(db)
+
+    return repo.get_subscribers()
+
+
+def main():
+    # Create the database client
+    db = firestore.Client()
+
+    # Get today's reading plan.
+    task_today = get_today_reading_plan(db)
+
+    # If there is no plan for today, the task ends
+    if task_today is None:
+        print('No task for today.')
+        return
+
+    # Prepare Bible.
+    bible = Bible()
+
+    # Get verses for today.
+    today_verses = get_verses_from_reading_task(bible, task_today)
+
+    # Format the verses nicely
+    verses = beautify_verses(today_verses)
 
     # Which chapter and book the verses are from
-    reading_chapter = f'📚<b>{task_today.book.upper()} {task_today.chapter}</b>'
+    reading_chapter = f'📚<b>{task_today.book.upper()} {task_today.chapter} (NIV84)</b>📚'
 
-    # Join the verses into a single string.
-    verses = '\n'.join(today_verses)
-
-    # The message lines to be send by telegram bot.
+    # The message lines to be sent.
     message_lines = [
         "Hi friends 🖐! Here's the reading plan for today.",
         '\n',
         reading_chapter,
         verses
     ]
+    # The message to be sent
+    telegram_message = '\n'.join(message_lines)
 
-    # Start the bot
+    # Get all subscribers
+    subscribers = get_subscribers(db)
+
+    if len(subscribers) == 0:
+        print('No subscribers to send')
+        return
+
+    # Get access to the bot
     bot = telegram.Bot(token=TOKEN)
-    bot.send_message(
-        chat_id=278794854,
-        text='\n'.join(message_lines),
-        parse_mode=telegram.ParseMode.HTML
-    )
+
+    # Send the message to all subscribers
+    for chat_id in subscribers:
+        bot.send_message(
+            chat_id=chat_id,
+            text=telegram_message,
+            parse_mode=telegram.ParseMode.HTML
+        )
+
+    print(f'Successfully sent messages to {len(subscribers)} subscriber(s)')
+
 
 if __name__ == "__main__":
     main()
