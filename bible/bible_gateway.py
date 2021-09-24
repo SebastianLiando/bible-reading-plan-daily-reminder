@@ -1,9 +1,14 @@
-from typing import Dict, List, Tuple
+from typing import List, Tuple
 from bs4 import BeautifulSoup
-from bs4.element import Tag
+from bs4.element import NavigableString, Tag
+from . import utils
 import requests
 
 BASE_URL = 'https://www.biblegateway.com/passage'
+
+
+def is_html_tag(test, name: str) -> bool:
+    return isinstance(test, Tag) and test.name == name
 
 
 class BibleGateway:
@@ -35,7 +40,7 @@ class BibleGatewayParser:
         Returns:
             List[Tuple[str, str]]: The first is the verse and the second is the footnote.
         """
-        soup = BeautifulSoup(raw, 'html.parser')
+        soup = BeautifulSoup(self.raw_html, 'html.parser')
         result = []
 
         footnotes_section = soup.find('div', class_='footnotes')
@@ -62,10 +67,55 @@ class BibleGatewayParser:
 
         return result
 
+    def _extract_header(self, header: Tag) -> str:
+        header_span = header.find('span')
+        header_text = list(header_span.children)[0]
 
-gateway = BibleGateway()
-raw = gateway.get_html('Exodus', 6)
+        return f'<b>{header_text}</b>'
 
-parser = BibleGatewayParser(raw)
-for (k, v) in parser.get_footnotes():
-    print(f'{k} -> {v}')
+    def _extract_paragraph(self, p: Tag) -> str:
+        verses_in_paragraph = ''
+
+        spans = filter(lambda x: is_html_tag(x, 'span'), p.children)
+
+        for span in spans:
+            for content in span.children:
+                # If the current content is a verse number or footnote.
+                # Verse number -> it is in a <sup class="versenum">.
+                # Footnote -> it is in a <sup class="footnote">.
+                if is_html_tag(content, 'sup'):
+                    sup_class = content.get('class')
+
+                    if 'versenum' in sup_class:
+                        # Verse number
+                        verse_num = int(content.text)
+                        verses_in_paragraph += f' <b>{utils.get_superscript(verse_num)}</b> '
+                    elif 'footnote' in sup_class:
+                        # Footnote
+                        verses_in_paragraph += f'<i>{content.text}</i>'
+
+                # If it is a part of the verse
+                elif isinstance(content, NavigableString):
+                    verses_in_paragraph += content.text
+
+                # If it is a part of the verse, but within a <span class="small-caps"
+                elif is_html_tag(content, 'span') and 'small-caps' in content.get('class', []):
+                    verses_in_paragraph += content.text
+
+        return verses_in_paragraph
+
+    def get_formatted_verses(self) -> str:
+        soup = BeautifulSoup(self.raw_html, 'html.parser')
+
+        result_lines = []
+        std_text = soup.find('div', class_='std-text')
+
+        for child in std_text.children:
+            if is_html_tag(child, 'h3'):
+                # This is header
+                result_lines.append(self._extract_header(child))
+            elif is_html_tag(child, 'p'):
+                # This is <p>, contains <span> elements
+                result_lines.append(self._extract_paragraph(child))
+
+        return '\n\n'.join(result_lines)

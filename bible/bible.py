@@ -1,12 +1,16 @@
-from typing import List, Tuple
-from assets import get_asset
+import xml.etree.ElementTree as ElementTree
 from fuzzywuzzy import fuzz
 
-import xml.etree.ElementTree as ElementTree
+import sys
+import os
+sys.path.append(os.getcwd())
+
+from assets import get_asset
+from typing import List, Tuple
 
 
 class Bible:
-    def __init__(self, asset_name: str='niv.xml') -> None:
+    def __init__(self, asset_name: str = 'niv.xml') -> None:
         # Get the XML file path.
         asset_path = get_asset(asset_name)
 

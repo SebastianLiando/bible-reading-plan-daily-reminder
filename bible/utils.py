@@ -18,6 +18,9 @@ def get_superscript(num: int) -> str:
     '''
     digits = []
 
+    if num == 0:
+        return superscript[0]
+
     while num > 0:
         digit = num % 10
         digits.append(digit)
