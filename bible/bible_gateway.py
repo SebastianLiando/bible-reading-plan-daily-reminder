@@ -17,7 +17,7 @@ class BibleGateway:
         book_parsed = book.replace(" ", "%20")
 
         # Add the query parameters
-        return BASE_URL + f'/?search={book_parsed}+{chapter}' + f'&{version}'
+        return BASE_URL + f'/?search={book_parsed}+{chapter}' + f'&version={version}'
 
     def get_html(self, book: str, chapter: int, version: str = 'NIV') -> str:
         result = requests.get(self.get_url(book, chapter, version))
