@@ -224,11 +224,15 @@ def main():
 
     # Send the message to all subscribers
     for chat_id in subscribers:
-        bot.send_message(
-            chat_id=chat_id,
-            text=telegram_message,
-            parse_mode=telegram.ParseMode.HTML
-        )
+        # Send message every 4000 characters, this is telegram's limitation.
+        for i in range(0, len(telegram_message), 4000):
+            sub_message = telegram_message[i:i+4000]
+
+            bot.send_message(
+                chat_id=chat_id,
+                text=sub_message,
+                parse_mode=telegram.ParseMode.HTML
+            )
 
     print(f'Successfully sent messages to {len(subscribers)} subscriber(s)')
 
