@@ -1,10 +1,5 @@
 import xml.etree.ElementTree as ElementTree
 from fuzzywuzzy import fuzz
-
-import sys
-import os
-sys.path.append(os.getcwd())
-
 from assets import get_asset
 from typing import List, Tuple
 

@@ -1,5 +1,5 @@
-from .utils import get_test_asset_content, get_expected_footnotes
-from bible.bible_gateway import BibleGatewayParser, BibleGateway
+from ..utils import get_test_asset_content, get_expected_footnotes
+from bible.bible_gateway import BibleGatewayParser
 
 
 def assert_footnotes_and_contents(source: str, expected: str, footnote: str):
@@ -26,9 +26,3 @@ def test_colossians_3():
         'col-3_expected.txt',
         'col-3_footnotes.txt'
     )
-
-# gateway = BibleGateway()
-# raw = gateway.get_html('Exodus', 3)
-
-# parser = BibleGatewayParser(raw)
-# print(parser.get_formatted_verses())
