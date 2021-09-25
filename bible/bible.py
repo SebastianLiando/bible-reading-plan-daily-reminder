@@ -1,12 +1,11 @@
-from typing import List, Tuple
-from assets import get_asset
-from fuzzywuzzy import fuzz
-
 import xml.etree.ElementTree as ElementTree
+from fuzzywuzzy import fuzz
+from assets import get_asset
+from typing import List, Tuple
 
 
 class Bible:
-    def __init__(self, asset_name: str='niv.xml') -> None:
+    def __init__(self, asset_name: str = 'niv.xml') -> None:
         # Get the XML file path.
         asset_path = get_asset(asset_name)
 
@@ -103,3 +102,30 @@ class Bible:
                 result.append(verses[str(i)])
 
         return result
+
+    def get_verse_range(self, book: str, chapter: int, start: int, end: int) -> Tuple[int, int]:
+        """Returns the verse range for the given book and chapter.
+
+        Args:
+            book (str): The book
+            chapter (int): The chapter number
+            start (int): Desired start verse number
+            end (int): Desired end verse number
+
+        Returns:
+            Tuple[int, int]: The valid start and end verse number
+        """
+        verses = self.content[book][str(chapter)]
+        verses_count = len(verses)
+
+        result_start = start
+
+        if result_start < 1:
+            result_start = 1
+
+        result_end = end
+
+        if result_end > verses_count:
+            result_end = verses_count
+
+        return (result_start, result_end)

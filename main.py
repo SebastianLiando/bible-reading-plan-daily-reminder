@@ -1,14 +1,15 @@
-from datetime import date, datetime
-from typing import List, Optional, Set
-from google.cloud import firestore
-from bible.plan_manager import ReadingTask
-from data.plan_repository import PlanRepository
-from data.subscriber_repository import SubscriberRepository
-from bible.bible import Bible
-from bot_token import TOKEN
-from utils import get_superscript
-
 import telegram
+from bible.utils import get_superscript
+from bot_token import TOKEN
+from bible.bible import Bible
+from data.subscriber_repository import SubscriberRepository
+from data.plan_repository import PlanRepository
+from bible.plan_manager import ReadingTask
+from google.cloud import firestore
+from typing import List, Optional, Set, Tuple
+from time import strftime
+from datetime import date, datetime
+from bible.bible_gateway import BibleGateway, BibleGatewayParser
 
 
 def get_date_today() -> date:
@@ -18,6 +19,21 @@ def get_date_today() -> date:
         date: The date of today.
     """
     return datetime.now().date()
+
+
+def format_date_today(today: date) -> str:
+    return strftime('%B %d, %Y', today.timetuple())
+
+
+def get_reading_plan_day_number() -> int:
+    today = get_date_today()
+    start_date = datetime(2021, 1, 7).date()
+
+    delta = today - start_date
+    num_of_days_from_first_jan = delta.days + 1
+    num_of_sundays = delta.days // 7
+
+    return num_of_days_from_first_jan - num_of_sundays
 
 
 def get_today_reading_plan(db: firestore.Client) -> Optional[ReadingTask]:
@@ -78,6 +94,18 @@ def beautify_verses(verses: List[str], separator: str = '\n') -> str:
     return separator.join(result)
 
 
+def format_footnotes(footnotes: List[Tuple[str, str]]) -> str:
+    result = []
+
+    for i in range(len(footnotes)):
+        alphabet = chr(ord('a') + i)
+
+        (verse, footnote) = footnotes[i]
+        result.append(f'{alphabet}. {verse} - {footnote}')
+
+    return '\n'.join(result)
+
+
 def get_subscribers(db: firestore.Client) -> Set[str]:
     """Returns subscriber ids from firestore.
 
@@ -90,6 +118,63 @@ def get_subscribers(db: firestore.Client) -> Set[str]:
     repo = SubscriberRepository(db)
 
     return repo.get_subscribers()
+
+
+def get_verses_from_fallback(task: ReadingTask, bible: Bible) -> str:
+    # Get verses for today.
+    today_verses = get_verses_from_reading_task(bible, task)
+
+    # Format the verses nicely
+    return beautify_verses(today_verses)
+
+
+def get_data_from_bible_gateway(task: ReadingTask, bible: Bible) -> Tuple[str, List[Tuple[str, str]]]:
+    book = bible.fuzzy_search_book(task.book)
+    chapter = task.chapter
+    (start, end) = bible.get_verse_range(
+        book, chapter,
+        task.start_verse, task.end_verse
+    )
+
+    # Call bible gateway to get the html source
+    gateway = BibleGateway()
+    raw = gateway.get_html(book, chapter)
+
+    parser = BibleGatewayParser(raw)
+
+    # Get the verses
+    verses = parser.extract_verses(from_verse=start, to_verse=end)
+
+    # Get the footnotes
+    footnotes = parser.get_footnotes()
+
+    return (verses, footnotes)
+
+
+def format_telegram_message(task: ReadingTask, verses: str, footnotes: List[Tuple[str, str]]) -> str:
+    # Today's date, formatted
+    today_date = f'📅 <b>{format_date_today(get_date_today())}</b>'
+
+    # Reading plan, formatted
+    reading_chapter = f'{task.book.upper()} {task.chapter}'
+    reading_plan = f'📖 Bible Reading Day {get_reading_plan_day_number()} - <b>{reading_chapter}</b>'
+
+    # The message lines to be sent.
+    message_lines = [
+        today_date,
+        reading_plan,
+        '\n',
+        verses,
+    ]
+
+    # Add footnote if any
+    if not footnotes is None and len(footnotes) > 0:
+        formatted_footnotes = format_footnotes(footnotes)
+        message_lines.append('\n')
+        message_lines.append('📝 <b>Footnotes</b>')
+        message_lines.append(formatted_footnotes)
+
+    return '\n'.join(message_lines)
 
 
 def main():
@@ -107,30 +192,29 @@ def main():
     # Prepare Bible.
     bible = Bible()
 
-    # Get verses for today.
-    today_verses = get_verses_from_reading_task(bible, task_today)
+    # Get the verses and footnotes
+    try:
+        # Try to fetch from bible gateway first.
+        (verses, footnotes) = get_data_from_bible_gateway(task_today, bible)
+    except Exception as e:
+        # If failed to fetch from bible gateway, use local Bible data.
+        print(f'Failed to fetch BibleGateway for task: {task_today}, {e}')
+        print('Using fallback instead')
 
-    # Format the verses nicely
-    verses = beautify_verses(today_verses)
+        verses = get_verses_from_fallback(task_today, bible)
+        footnotes = None
 
-    # Which chapter and book the verses are from
-    start_verse_no = 1 if task_today.start_verse == -1 else task_today.start_verse
-    end_verse_no = start_verse_no + len(today_verses) - 1
-    reading_chapter = f'📚<b>{task_today.book.upper()} {task_today.chapter}:{start_verse_no}-{end_verse_no} (NIV84)</b>📚'
-
-    # The message lines to be sent.
-    message_lines = [
-        "Hi friends 🖐! Here's the reading plan for today.",
-        '\n',
-        reading_chapter,
-        verses
-    ]
     # The message to be sent
-    telegram_message = '\n'.join(message_lines)
+    telegram_message = format_telegram_message(
+        task=task_today,
+        verses=verses,
+        footnotes=footnotes
+    )
 
     # Get all subscribers
     subscribers = get_subscribers(db)
 
+    # Exit if there are no subscribers
     if len(subscribers) == 0:
         print('No subscribers to send')
         return
