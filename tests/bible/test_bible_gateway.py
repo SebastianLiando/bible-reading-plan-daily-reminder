@@ -3,7 +3,7 @@ from bible.bible_gateway import BibleGatewayParser, BibleGateway
 import requests_mock
 
 
-def assert_footnotes_and_contents(source: str, expected: str, footnote: str):
+def assert_footnotes_contents(source: str, expected: str, footnote: str):
     raw = get_test_asset_content(source)
 
     parser = BibleGatewayParser(raw)
@@ -16,16 +16,95 @@ def assert_footnotes_and_contents(source: str, expected: str, footnote: str):
 
     # Check formatted verses
     expected_content = get_test_asset_content(expected)
-    content = parser.get_formatted_verses()
+    content = parser.extract_verses()
+
+    assert content == expected_content
+
+
+def assert_cut(source: str, expected: str, from_verse: int = 1, to_verse: int = -1):
+    raw = get_test_asset_content(source)
+
+    parser = BibleGatewayParser(raw)
+
+    expected_content = get_test_asset_content(expected)
+    content = parser.extract_verses(from_verse=from_verse, to_verse=to_verse)
 
     assert content == expected_content
 
 
 def test_colossians_3():
-    assert_footnotes_and_contents(
+    assert_footnotes_contents(
         'col-3.txt',
         'col-3_expected.txt',
         'col-3_footnotes.txt'
+    )
+
+
+def test_1_timothy_3():
+    assert_footnotes_contents(
+        '1-timothy-3.txt',
+        '1-timothy-3_expected.txt',
+        '1-timothy-3_footnotes.txt',
+    )
+
+
+def test_exodus_3():
+    assert_footnotes_contents(
+        'exodus-3.txt',
+        'exodus-3_expected.txt',
+        'exodus-3_footnotes.txt'
+    )
+
+
+def test_psalm_1():
+    assert_footnotes_contents(
+        'psalm-6.txt',
+        'psalm-6_expected.txt',
+        'psalm-6_footnotes.txt'
+    )
+
+
+def test_psalm_6():
+    assert_footnotes_contents(
+        'psalm-6.txt',
+        'psalm-6_expected.txt',
+        'psalm-6_footnotes.txt'
+    )
+
+
+# File name that contains the source HTML file to test verse cutting
+CUT_TEST_SOURCE_FILE = 'partial.txt'
+
+
+def test_cutting_from_argument_only():
+    assert_cut(
+        CUT_TEST_SOURCE_FILE,
+        'partial_from.txt',
+        from_verse=15
+    )
+
+
+def test_cutting_to_argument_only():
+    assert_cut(
+        CUT_TEST_SOURCE_FILE,
+        'partial_to.txt',
+        to_verse=3
+    )
+
+
+def test_cutting_from_and_to_valid():
+    assert_cut(
+        CUT_TEST_SOURCE_FILE,
+        'partial_from_to_valid.txt',
+        from_verse=7, to_verse=8
+    )
+
+
+def test_cutting_from_and_to_invalid():
+    assert_cut(
+        CUT_TEST_SOURCE_FILE,
+        'partial_from_to_invalid.txt',
+        from_verse=15, to_verse=1
     )
 
 

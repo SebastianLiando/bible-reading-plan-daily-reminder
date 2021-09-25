@@ -129,3 +129,6 @@ firebase-admin-sdk.json
 
 # Reading plan
 plan.csv
+
+# Testing script
+test.py
