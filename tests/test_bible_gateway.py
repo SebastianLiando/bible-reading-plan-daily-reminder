@@ -1,8 +1,4 @@
-import sys
-import os
-sys.path.append(os.getcwd())
-
-from utils import get_test_asset_content, get_expected_footnotes
+from .utils import get_test_asset_content, get_expected_footnotes
 from bible.bible_gateway import BibleGatewayParser, BibleGateway
 
 
@@ -27,6 +23,12 @@ def assert_footnotes_and_contents(source: str, expected: str, footnote: str):
 def test_colossians_3():
     assert_footnotes_and_contents(
         'col-3.txt',
-        'col-3_footnotes.txt',
-        'col-3_expected.txt'
+        'col-3_expected.txt',
+        'col-3_footnotes.txt'
     )
+
+# gateway = BibleGateway()
+# raw = gateway.get_html('Exodus', 3)
+
+# parser = BibleGatewayParser(raw)
+# print(parser.get_formatted_verses())

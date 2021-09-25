@@ -73,6 +73,52 @@ class BibleGatewayParser:
 
         return f'<b>{header_text}</b>'
 
+    def _extract_poetry_span_text(self, span: Tag) -> str:
+        """Recursively extract the content text of the <span> tag.
+
+        Args:
+            span (Tag): The span tag.
+
+        Returns:
+            str: The extracted text.
+        """
+        children = list(span.children)
+
+        # Base case
+        if len(children) == 1 and isinstance(children[0], NavigableString):
+            return children[0].text
+
+        result = ''
+
+        # Else, iterate and extract
+        for child in children:
+            if isinstance(child, NavigableString):
+                result += child.text
+            elif is_html_tag(child, 'sup') and 'versenum' in child.get('class', []):
+                verse_num = child.text
+                result += self._format_verse_num(verse_num)
+            elif is_html_tag(child, 'span'):
+                result += self._extract_poetry_span_text(child)
+
+        return result
+
+    def _extract_poetry(self, div: Tag) -> str:
+        result = ''
+
+        p = div.find('p')
+        for child in p.children:
+            if is_html_tag(child, 'br'):
+                result += '\n'
+            elif is_html_tag(child, 'span'):
+                result += self._extract_poetry_span_text(child)
+
+        return result
+
+    def _format_verse_num(self, num: str) -> str:
+        num_chars = filter(lambda c: c.isnumeric(), num)
+        number = int(''.join(num_chars))
+        return f' <b>{utils.get_superscript(number)}</b> '
+
     def _extract_paragraph(self, p: Tag) -> str:
         verses_in_paragraph = ''
 
@@ -88,8 +134,8 @@ class BibleGatewayParser:
 
                     if 'versenum' in sup_class:
                         # Verse number
-                        verse_num = int(content.text)
-                        verses_in_paragraph += f' <b>{utils.get_superscript(verse_num)}</b> '
+                        verse_num = content.text
+                        verses_in_paragraph += self._format_verse_num(verse_num)
                     elif 'footnote' in sup_class:
                         # Footnote
                         verses_in_paragraph += f'<i>{content.text}</i>'
@@ -98,7 +144,7 @@ class BibleGatewayParser:
                 elif isinstance(content, NavigableString):
                     verses_in_paragraph += content.text
 
-                # If it is a part of the verse, but within a <span class="small-caps"
+                # If it is a part of the verse, but within a <span class="small-caps">
                 elif is_html_tag(content, 'span') and 'small-caps' in content.get('class', []):
                     verses_in_paragraph += content.text
 
@@ -117,5 +163,8 @@ class BibleGatewayParser:
             elif is_html_tag(child, 'p'):
                 # This is <p>, contains <span> elements
                 result_lines.append(self._extract_paragraph(child))
+            elif is_html_tag(child, 'div') and 'poetry' in child.get('class', []):
+                # If it is a poetry
+                result_lines.append(self._extract_poetry(child))
 
         return '\n\n'.join(result_lines)
