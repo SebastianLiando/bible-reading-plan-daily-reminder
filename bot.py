@@ -1,4 +1,3 @@
-from telegram import bot
 from telegram.ext.callbackqueryhandler import CallbackQueryHandler
 from telegram.ext.commandhandler import CommandHandler
 from telegram.ext.filters import Filters
