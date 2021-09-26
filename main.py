@@ -1,6 +1,6 @@
 import telegram
 from bible.utils import get_superscript
-from bot_token import TOKEN
+from telegram_bot.env import TOKEN
 from bible.bible import Bible
 from data.subscriber_repository import SubscriberRepository
 from data.plan_repository import PlanRepository
