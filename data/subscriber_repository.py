@@ -53,7 +53,7 @@ class SubscriberRepository:
     def is_subscribed(self, chat_id: str) -> bool:
         documents = self.collection.where(CHAT_ID, '==', chat_id).get()
 
-        doc = list(map(lambda x: x.exists), documents)
+        doc = list(documents)
 
         if len(doc) == 0:
             return False
