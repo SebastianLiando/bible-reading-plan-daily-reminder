@@ -47,7 +47,18 @@ class SubscriberRepository:
             CHAT_ID: chat_id
         }
 
-        self.collection.add(data)
+        if not self.is_subscribed(chat_id):
+            self.collection.add(data)
+
+    def is_subscribed(self, chat_id: str) -> bool:
+        documents = self.collection.where(CHAT_ID, '==', chat_id).get()
+
+        doc = list(map(lambda x: x.exists), documents)
+
+        if len(doc) == 0:
+            return False
+        else:
+            return True
 
     def remove_subscriber(self, chat_id: str):
         """Removes a subscriber from the database. If the subscriber doesn't exist, this operation
