@@ -7,7 +7,7 @@ TOKEN = os.environ['BOT_TOKEN']
 PORT = os.environ.get('PORT', 8443)
 
 # Whether to use webhook
-USE_WEBHOOK = os.environ.get('BOT_WEBHOOK', False)
+USE_WEBHOOK = bool(os.environ.get('BOT_WEBHOOK', 'False'))
 
 # Webhook URL
 BASE_URL = os.environ.get('BOT_BASE_URL', '')
