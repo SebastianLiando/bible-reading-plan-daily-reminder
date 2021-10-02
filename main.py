@@ -1,7 +1,7 @@
 import telegram
 from telegram_bot.env import TOKEN
 from google.cloud import firestore
-import utils
+from telegram_bot.utils import get_message_for_today, get_subscribers
 
 
 def main():
@@ -9,10 +9,10 @@ def main():
     db = firestore.Client()
 
     # Get today's message
-    telegram_message = utils.get_message_for_today(db)
+    telegram_message = get_message_for_today(db)
 
     # Get all subscribers
-    subscribers = utils.get_subscribers(db)
+    subscribers = get_subscribers(db)
 
     # Exit if there are no subscribers
     if len(subscribers) == 0:
