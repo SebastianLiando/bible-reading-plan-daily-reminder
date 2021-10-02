@@ -8,12 +8,11 @@ A telegram bot that sends daily reading plan arranged by PULSE ministry of Juron
 
 These are the required environment variables.
 
-| Name                                               | Description                                             |
-| -------------------------------------------------- | ------------------------------------------------------- |
-| BOT_BASE_URL                                       | The webhook URL of the bot.                             |
-| BOT_TOKEN                                          | The token of the bot to be used.                        |
-| BOT_WEBHOOK                                        | Set this to `true` if the bot should run using webhook. |
-| If set to `false`, the bot will run using polling. |
+| Name         | Description                                                                                                |
+| ------------ | ---------------------------------------------------------------------------------------------------------- |
+| BOT_BASE_URL | The webhook URL of the bot.                                                                                |
+| BOT_TOKEN    | The token of the bot to be used.                                                                           |
+| BOT_WEBHOOK  | Set this to `true` if the bot should run using webhook. If set to `false`, the bot will run using polling. |
 
 ### Google Application Credentials
 
