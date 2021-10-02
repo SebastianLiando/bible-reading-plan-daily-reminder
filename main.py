@@ -29,7 +29,7 @@ def main():
             sub_message = telegram_message[i:i+4000]
 
             bot.send_message(
-                chat_id=278794854,
+                chat_id=chat_id,
                 text=sub_message,
                 parse_mode=telegram.ParseMode.HTML
             )
