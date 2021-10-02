@@ -67,8 +67,8 @@ def reply_authorized(chat_id: str, update: Update):
     )
 
 
-def is_sender_authorized_to_modify(chat: Chat, sender: User) -> bool:
-    """Checks if the user that wants to modify the subscription has the privilege to do so. 
+def is_sender_authorized(chat: Chat, sender: User) -> bool:
+    """Checks if the user is allowed to call privileged commands. 
     User is always authorized in their private message with the bot. For channels and groups, the user
     must be either the owner or an admin.
 

@@ -2,7 +2,7 @@ from telegram.constants import PARSEMODE_HTML
 from telegram_bot.const import CALLBACK_DATA_CANCEL, LABEL_CANCEL_OPERATION, build_subscription_change_message
 from telegram import Update
 from telegram.ext import CallbackContext
-from telegram_bot.handler_utils import toggle_subscription, is_sender_authorized_to_modify, reply_authorized, reply_unauthorized
+from telegram_bot.handler_utils import toggle_subscription, is_sender_authorized, reply_authorized, reply_unauthorized
 from telegram_bot.utils import get_message_for_today
 from google.cloud import firestore
 
@@ -18,7 +18,7 @@ def on_command_start(update: Update, _: CallbackContext):
 
     chat_id = update.effective_chat.id
 
-    if is_sender_authorized_to_modify(update.effective_chat, update.effective_user):
+    if is_sender_authorized(update.effective_chat, update.effective_user):
         reply_authorized(chat_id, update)
     else:
         reply_unauthorized(chat_id, update)
@@ -31,14 +31,15 @@ def on_command_today(update: Update, _: CallbackContext):
         update (Update): The update object
         _ (CallbackContext): The context object.
     """
-    db = firestore.Client()
-    todays_content = get_message_for_today(db)
+    if is_sender_authorized(update.effective_chat, update.effective_user):
+        db = firestore.Client()
+        todays_content = get_message_for_today(db)
 
-    for i in range(0, len(todays_content), 4000):
-        update.effective_chat.send_message(
-            text=todays_content[i:i+4000],
-            parse_mode=PARSEMODE_HTML
-        )
+        for i in range(0, len(todays_content), 4000):
+            update.effective_chat.send_message(
+                text=todays_content[i:i+4000],
+                parse_mode=PARSEMODE_HTML
+            )
 
 
 commands = {
