@@ -1,7 +1,10 @@
+from telegram.constants import PARSEMODE_HTML
 from telegram_bot.const import CALLBACK_DATA_CANCEL, LABEL_CANCEL_OPERATION, build_subscription_change_message
 from telegram import Update
 from telegram.ext import CallbackContext
 from telegram_bot.handler_utils import toggle_subscription, is_sender_authorized_to_modify, reply_authorized, reply_unauthorized
+from telegram_bot.utils import get_message_for_today
+from google.cloud import firestore
 
 
 def on_command_start(update: Update, _: CallbackContext):
@@ -21,17 +24,39 @@ def on_command_start(update: Update, _: CallbackContext):
         reply_unauthorized(chat_id, update)
 
 
+def on_command_today(update: Update, _: CallbackContext):
+    """Callback when the user calls `/today` command.
+
+    Args:
+        update (Update): The update object
+        _ (CallbackContext): The context object.
+    """
+    db = firestore.Client()
+    todays_content = get_message_for_today(db)
+
+    for i in range(0, len(todays_content), 4000):
+        update.effective_chat.send_message(
+            text=todays_content[i:i+4000],
+            parse_mode=PARSEMODE_HTML
+        )
+
+
 commands = {
-    'start': on_command_start
+    'start': on_command_start,
+    'today': on_command_today
 }
+"""Commands and the corresponding callback function."""
 
 
 def on_message(update: Update, callback: CallbackContext):
     text = update.effective_message.text
 
-    # Drop the slash
+    # Message must start with slash
     if text[0] == '/':
+        # Drop the slash for matching to command
         text = text[1:]
+    else:
+        return
 
     # Redirect to command callbacks
     if text in commands.keys():
