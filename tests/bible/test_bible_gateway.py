@@ -71,6 +71,16 @@ def test_psalm_6():
         'psalm-6_footnotes.txt'
     )
 
+# https://github.com/SebastianLiando/bible-reading-plan-daily-reminder/issues/7
+
+
+def test_john_17():
+    assert_footnotes_contents(
+        'john-17.txt',
+        'john-17_expected.txt',
+        'john-17_footnotes.txt'
+    )
+
 
 # File name that contains the source HTML file to test verse cutting
 CUT_TEST_SOURCE_FILE = 'partial.txt'
