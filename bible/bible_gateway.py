@@ -185,6 +185,12 @@ class BibleGatewayParser:
             elif is_html_tag(child, 'div') and 'poetry' in child.get('class', []):
                 # If it is a poetry
                 result_lines.append(self._extract_poetry(child))
+            elif is_html_tag(child, 'div'):
+                # John 17 use this structure as paragraph
+                paragraphs = child.findChildren('p')
+                for p_child in paragraphs:
+                    print(f'p_child: {p_child}')
+                    result_lines.append(self._extract_paragraph(p_child))
 
         result = '\n\n'.join(result_lines)
 
