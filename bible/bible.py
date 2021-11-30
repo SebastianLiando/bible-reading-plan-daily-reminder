@@ -36,7 +36,7 @@ class Bible:
         scores = {}
 
         for book in books:
-            score = fuzz.partial_ratio(book, query.lower())
+            score = fuzz.ratio(book, query.lower())
             scores[book] = score
 
         best_score = max(scores.values())
