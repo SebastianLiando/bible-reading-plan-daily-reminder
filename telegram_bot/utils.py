@@ -70,7 +70,7 @@ def format_telegram_message(task: ReadingTask, body: str) -> str:
 
     # Reading plan, formatted
     reading_chapter = f'{task.book.upper()} {task.chapter}'
-    reading_plan = f'📖 Bible Reading Day {get_reading_plan_day_number()} - <b>{reading_chapter}</b>'
+    reading_plan = f'📖 <b>{reading_chapter}</b>'
 
     # The message lines to be sent.
     message_lines = [

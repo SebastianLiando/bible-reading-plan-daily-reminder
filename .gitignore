@@ -127,8 +127,8 @@ dmypy.json
 # Secret
 firebase-admin-sdk.json
 
-# Reading plan
-plan.csv
+# Reading plans 
+plan*.csv
 
 # Testing script
 test.py
