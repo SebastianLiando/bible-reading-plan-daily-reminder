@@ -72,7 +72,7 @@ _FALLBACK_SERVICE_REMINDER = f'''⏰ Gentle reminder to register for this week\'
 If you haven't <b><a href = "{FALLBACK_URL}">click here to register now.</a></b>'''
 
 
-def build_service_reminder(url: Optional[str]) -> str:
+def build_service_reminder_message(url: Optional[str]) -> str:
     if url is None:
         return _FALLBACK_SERVICE_REMINDER
         
