@@ -1,11 +1,11 @@
-from ast import parse
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List, Optional
 import requests
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
+FALLBACK_URL = 'https://tinyurl.com/jcceng'
 JCC_ORG_ID = 'jcc-english-30621951616'
 
 UPCOMING_SECT_SELECTOR = 'div [data-testid="organizer-profile__future-events"]'
@@ -96,3 +96,13 @@ def get_event_on(date: datetime, org_id: str = JCC_ORG_ID) -> Optional[Eventbrit
             return event
 
     return None
+
+
+def get_next_jcc_sermon():
+    # Get datetime of the coming sunday
+    next_sunday = datetime.now()
+    while datetime.strftime(next_sunday, '%a') != 'Sun':
+        next_sunday = next_sunday + timedelta(days=1)
+
+    event = get_event_on(next_sunday)
+    return event
