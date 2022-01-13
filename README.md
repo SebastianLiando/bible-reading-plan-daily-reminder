@@ -25,10 +25,11 @@ setup for connecting to your Firebase project.
 
 This script contains the code needed to start up the telegram bot. The bot currently has 2 available commands. All commands are available to personal chat with the bot. However, privileged commands are only available to owners and admins for groups, supergroups, and channels.
 
-| Command | Privileged | Description                                            |
-| ------- | ---------- | ------------------------------------------------------ |
-| /start  | YES        | Changes the chat's subscription to the daily reminder. |
-| /today  | YES        | Calls the bot to send today's reading plan.            |
+| Command | Privileged | Description                                                  |
+| ------- | ---------- | ------------------------------------------------------------ |
+| /start  | YES        | Changes the chat's subscription to the daily reminder.       |
+| /today  | YES        | Calls the bot to send today's reading plan.                  |
+| /sermon | YES        | Calls the bot to send the upcoming service registration link. |
 
 ### `main.py`
 
@@ -44,10 +45,10 @@ The first row is the heading: `date`, `book`, `chapter`, `start_verse`, `end_ver
 
 The values for each heading is as follows.
 
-| Heading       | Description                                                                                        | Example     |
-| ------------- | -------------------------------------------------------------------------------------------------- | ----------- |
-| `date`        | The date of the plan in `DD-MMM-YYYY` format.                                                      | 25-Sep-2021 |
-| `book`        | The Bible book name.                                                                               | Romans      |
-| `chapter`     | The chapter number.                                                                                | 1           |
-| `start_verse` | The starting verse number (inclusive). If this is blank, then it defaults to 1.                    | 1           |
-| `end_verse`   | The ending verse number (inclusive). If this is blank, then it defaults to the end of the chapter. | 10          |
+| Heading       | Description                                                                                        | Example   |
+| ------------- | -------------------------------------------------------------------------------------------------- | --------- |
+| `date`        | The date of the plan in `DD-MMM-YY` format.                                                        | 25-Sep-21 |
+| `book`        | The Bible book name.                                                                               | Romans    |
+| `chapter`     | The chapter number.                                                                                | 1         |
+| `start_verse` | The starting verse number (inclusive). If this is blank, then it defaults to 1.                    | 1         |
+| `end_verse`   | The ending verse number (inclusive). If this is blank, then it defaults to the end of the chapter. | 10        |
