@@ -1,5 +1,6 @@
 from telegram.constants import PARSEMODE_HTML
-from telegram_bot.const import CALLBACK_DATA_CANCEL, LABEL_CANCEL_OPERATION, build_subscription_change_message
+from eventbrite import FALLBACK_URL, get_next_jcc_sermon, _build_eventbrite_url
+from telegram_bot.const import CALLBACK_DATA_CANCEL, LABEL_CANCEL_OPERATION, build_service_reminder, build_subscription_change_message
 from telegram import Update
 from telegram.ext import CallbackContext
 from telegram_bot.handler_utils import toggle_subscription, is_sender_authorized, reply_authorized, reply_unauthorized
@@ -42,9 +43,25 @@ def on_command_today(update: Update, _: CallbackContext):
             )
 
 
+def on_command_sermon(update: Update, _: CallbackContext):
+    if is_sender_authorized(update.effective_chat, update.effective_user):
+        event = get_next_jcc_sermon()
+
+        if event is None:
+            message = build_service_reminder(None)
+        else:
+            message = build_service_reminder(event.url)
+
+        update.effective_chat.send_message(
+            message,
+            parse_mode=PARSEMODE_HTML,
+        )
+
+
 commands = {
     'start': on_command_start,
-    'today': on_command_today
+    'today': on_command_today,
+    'sermon': on_command_sermon,
 }
 """Commands and the corresponding callback function."""
 
