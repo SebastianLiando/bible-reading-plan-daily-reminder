@@ -16,7 +16,7 @@ def main():
         message = build_service_reminder_message(event.url)
 
     # Get all subscribers
-    subscribers = get_subscribers_chat_ids(SubscriptionItem.SERVICE_REMINDER)
+    subscribers = get_subscribers_chat_ids(SubscriptionItem.SUNDAY_SERVICE)
 
     # Exit if there are no subscribers
     if len(subscribers) == 0:

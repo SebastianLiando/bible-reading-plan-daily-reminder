@@ -109,5 +109,5 @@ def on_subscription_change(update: Update, _: CallbackContext):
     subscribed = toggle_subscription(chat_id, sub_item)
 
     # Notify that the user has changed the subscription
-    reply = build_subscription_change_message(subscribed)
+    reply = build_subscription_change_message(subscribed, sub_item)
     query.edit_message_text(text=reply)

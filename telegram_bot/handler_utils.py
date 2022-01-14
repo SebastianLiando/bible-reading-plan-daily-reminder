@@ -1,10 +1,11 @@
+from ast import dump
 from telegram.chat import Chat
 from telegram.constants import CHAT_CHANNEL, CHAT_PRIVATE, CHATMEMBER_ADMINISTRATOR, CHATMEMBER_CREATOR, PARSEMODE_HTML
 from telegram.inline.inlinekeyboardbutton import InlineKeyboardButton
 from telegram.inline.inlinekeyboardmarkup import InlineKeyboardMarkup
 from telegram.user import User
 from telegram_bot.const import BUTTON_CANCEL, CALLBACK_DATA_CANCEL, build_button_label, build_start_message
-from data.subscriber_repository import SubscriberRepository, SubscriptionItem
+from data.subscriber_repository import Subscriber, SubscriberRepository, SubscriptionItem
 from telegram import Update
 import json
 
@@ -17,10 +18,11 @@ def toggle_subscription(id: str, item: SubscriptionItem) -> bool:
 
 
 def reply_unauthorized_start(chat_id: str, update: Update):
-    subscribed = repo.is_subscribed(chat_id,
-                                    SubscriptionItem.BIBLE_READING_PLAN)
+    subscriber = repo.get(chat_id)
+    if subscriber is None:
+        subscriber = Subscriber(id='', chat_id=chat_id, sub_items=set())
 
-    message = build_start_message(subscribed, authorized=False)
+    message = build_start_message(subscriber, authorized=False)
 
     update.effective_chat.send_message(
         text=message,
@@ -29,28 +31,44 @@ def reply_unauthorized_start(chat_id: str, update: Update):
 
 
 def reply_authorized_start(chat_id: str, update: Update):
-    subscribed = repo.is_subscribed(chat_id,
-                                    SubscriptionItem.BIBLE_READING_PLAN)
-    button_label = build_button_label(subscribed)
+    # Get subscriber data for the chat
+    subscriber = repo.get(chat_id)
+    if subscriber is None:
+        subscriber = Subscriber(id='', chat_id=chat_id, sub_items=set())
 
-    subscription_button = InlineKeyboardButton(
-        text=button_label,
-        callback_data=json.dumps(
-            {'chat_id': chat_id, 'sub_item': SubscriptionItem.BIBLE_READING_PLAN.value})
-    )
+    # Create inline buttons
+    buttons = []
+
+    all_reminders = SubscriptionItem.values(sort=True)
+    for reminder in all_reminders:
+        # Check if subscribed
+        subscribed = subscriber.is_subscribed_to(reminder)
+
+        # Create the toggle button
+        button_label = build_button_label(subscribed, reminder)
+        callback_data = {
+            'chat_id': chat_id,
+            'sub_item': reminder.value
+        }
+        button = InlineKeyboardButton(
+            text=button_label,
+            callback_data=json.dumps(callback_data)
+        )
+
+        buttons.append(button)
 
     cancel_button = InlineKeyboardButton(
         text=BUTTON_CANCEL,
         callback_data=CALLBACK_DATA_CANCEL
     )
+    buttons.append(cancel_button)
 
-    keyboard = [
-        [subscription_button, cancel_button]
-    ]
+    keyboard = [[button] for button in buttons]  # 1 button per line
 
+    # Send the message
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    message = build_start_message(subscribed, authorized=True)
+    message = build_start_message(subscriber, authorized=True)
 
     update.effective_chat.send_message(
         text=message,

@@ -1,4 +1,4 @@
-from typing import Optional, Set
+from typing import List, Optional, Set
 from google.cloud import firestore
 from enum import Enum, auto, unique
 from dataclasses import dataclass, asdict
@@ -8,8 +8,35 @@ from data.firestore_repository import FirestoreRepository
 
 @unique
 class SubscriptionItem(Enum):
-    BIBLE_READING_PLAN = auto()
-    SERVICE_REMINDER = auto()
+    PULSE_BIBLE_READING_PLAN = auto()
+    SUNDAY_SERVICE = auto()
+
+    @staticmethod
+    def values(sort: bool = False) -> list:
+        all_values = [e for e in SubscriptionItem]
+
+        if sort:
+            all_values = sorted(all_values, key=lambda e: e.name)
+
+        return all_values
+
+    @property
+    def short_summary(self) -> str:
+        if self == SubscriptionItem.PULSE_BIBLE_READING_PLAN:
+            return f"{self.label} (8am SGT)"
+        elif self == SubscriptionItem.SUNDAY_SERVICE:
+            return f"{self.label} (Saturdays 8.30am SGT)"
+        else:
+            raise NotImplementedError(f'Unexpected enum! {self.name}')
+
+    @property
+    def label(self) -> str:
+        if self == SubscriptionItem.PULSE_BIBLE_READING_PLAN:
+            return "Pulse Bible reading plan"
+        elif self == SubscriptionItem.SUNDAY_SERVICE:
+            return "Sunday service registration"
+        else:
+            raise NotImplementedError(f'Unexpected enum! {self.name}')
 
 
 @dataclass(frozen=True, eq=True)
@@ -60,7 +87,7 @@ class SubscriberRepository(FirestoreRepository):
     def list_by_subscription(self, item: SubscriptionItem):
         snapshots = self.collection.where(
             'sub_items', 'array_contains', item.value).get()
-            
+
         items = map(lambda doc: self._create_from_doc(doc.id, doc.to_dict()),
                     snapshots)
         return list(items)
