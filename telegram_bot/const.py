@@ -102,3 +102,17 @@ def build_service_reminder_message(url: Optional[str]) -> str:
         return _FALLBACK_SERVICE_REMINDER
 
     return _SERVICE_REMINDER_MESSAGE_TEMPLATE.format(url, FALLBACK_URL)
+
+
+# -------------------------- Help message
+HELP_MESSAGE = '''Wow! You found this section, great job 👏!
+
+This bot is basically a reminder bot. You can subscribe or unsubscribe to topics that you want to be reminded of. 
+
+Get started by typing /start! Then choose which topics you want to be reminded of. It's as simple as that 🤩
+
+Source code is available in <a href="https://github.com/SebastianLiando/bible-reading-plan-daily-reminder">this GitHub repository</a>.
+Developed in <a href="https://www.python.org/">Python 3.7</a>, deployed in <a href="https://www.heroku.com">Heroku</a>, built with ❤️ and 2 brain cells.
+
+Have a blessed day!
+'''
