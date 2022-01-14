@@ -2,6 +2,8 @@
 
 A multipurpose telegram bot for reminders on Jurong Christian Church, such as sending Bible reading plan or Sunday service registration.
 
+![Bot preview](/assets/preview.png)
+
 ## Setup
 
 ### Environment Variables
@@ -24,12 +26,12 @@ This project uses Firebase as the backend service. Ensure that the deployment en
 
 This script starts the telegram bot. The bot currently has 3 available commands. All commands are available to personal chat with the bot. However, privileged commands are only available to owners and admins for groups, supergroups, and channels.
 
-| Command | Privileged | Description                                                   |
-| ------- | ---------- | ------------------------------------------------------------- |
-| /start  | YES        | Changes the chat's subscription to the reminder.              |
-| /today  | YES        | Calls the bot to send today's reading plan.                   |
+| Command  | Privileged | Description                                                   |
+| -------- | ---------- | ------------------------------------------------------------- |
+| /start   | YES        | Changes the chat's subscription to the reminder.              |
+| /today   | YES        | Calls the bot to send today's reading plan.                   |
 | /service | YES        | Calls the bot to send the upcoming service registration link. |
-| /help   | YES        | General introduction to the bot.                              |
+| /help    | YES        | General introduction to the bot.                              |
 
 ### `main.py`
 
