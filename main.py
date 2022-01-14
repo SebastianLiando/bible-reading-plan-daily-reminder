@@ -13,7 +13,7 @@ def main():
     telegram_message = get_message_for_today(db)
 
     # Get all subscribers
-    subscribers = get_subscribers_chat_ids(SubscriptionItem.BIBLE_READING_PLAN)
+    subscribers = get_subscribers_chat_ids(SubscriptionItem.PULSE_BIBLE_READING_PLAN)
 
     # Exit if there are no subscribers
     if len(subscribers) == 0:

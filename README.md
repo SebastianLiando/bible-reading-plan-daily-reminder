@@ -1,6 +1,8 @@
 # Bible Reading Plan Daily Reminder
 
-A telegram bot that sends daily reading plan arranged by PULSE ministry of Jurong Christian Church.
+A multipurpose telegram bot for reminders on Jurong Christian Church, such as sending Bible reading plan or Sunday service registration.
+
+![Bot preview](/assets/preview.png)
 
 ## Setup
 
@@ -16,24 +18,28 @@ These are the required environment variables.
 
 ### Google Application Credentials
 
-This project relies on Cloud Firestore service. Ensure that the deployment environment is properly
-setup for connecting to your Firebase project.
+This project uses Firebase as the backend service. Ensure that the deployment environment has been setup for Firebase.
 
 ## Scripts
 
 ### `bot.py`
 
-This script contains the code needed to start up the telegram bot. The bot currently has 2 available commands. All commands are available to personal chat with the bot. However, privileged commands are only available to owners and admins for groups, supergroups, and channels.
+This script starts the telegram bot. The bot currently has 3 available commands. All commands are available to personal chat with the bot. However, privileged commands are only available to owners and admins for groups, supergroups, and channels.
 
-| Command | Privileged | Description                                                  |
-| ------- | ---------- | ------------------------------------------------------------ |
-| /start  | YES        | Changes the chat's subscription to the daily reminder.       |
-| /today  | YES        | Calls the bot to send today's reading plan.                  |
-| /sermon | YES        | Calls the bot to send the upcoming service registration link. |
+| Command  | Privileged | Description                                                   |
+| -------- | ---------- | ------------------------------------------------------------- |
+| /start   | YES        | Changes the chat's subscription to the reminder.              |
+| /today   | YES        | Calls the bot to send today's reading plan.                   |
+| /service | YES        | Calls the bot to send the upcoming service registration link. |
+| /help    | YES        | General introduction to the bot.                              |
 
 ### `main.py`
 
-This script contains that sends today's reading plan to every subscriber. This is the script to be run in a cron job.
+This script sends today's reading plan to every subscriber. This is the script should run in a cron job.
+
+### `service_reminder.py`
+
+This script sends Evenbrite registration reminder to every subscriber. This is the script should run in a cron job.
 
 ### `upload_csv.py`
 
