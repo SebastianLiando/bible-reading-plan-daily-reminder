@@ -45,7 +45,7 @@ def on_command_today(update: Update, _: CallbackContext):
             )
 
 
-def on_command_sermon(update: Update, _: CallbackContext):
+def on_command_service(update: Update, _: CallbackContext):
     if is_sender_authorized(update.effective_chat, update.effective_user):
         event = get_next_jcc_sermon()
 
@@ -73,7 +73,7 @@ def on_command_help(update: Update, _: CallbackContext):
 commands = {
     'start': on_command_start,
     'today': on_command_today,
-    'sermon': on_command_sermon,
+    'service': on_command_service,
     'help': on_command_help,
 }
 """Commands and the corresponding callback function."""

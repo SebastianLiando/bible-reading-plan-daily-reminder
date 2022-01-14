@@ -28,7 +28,7 @@ This script starts the telegram bot. The bot currently has 3 available commands.
 | ------- | ---------- | ------------------------------------------------------------- |
 | /start  | YES        | Changes the chat's subscription to the reminder.              |
 | /today  | YES        | Calls the bot to send today's reading plan.                   |
-| /sermon | YES        | Calls the bot to send the upcoming service registration link. |
+| /service | YES        | Calls the bot to send the upcoming service registration link. |
 | /help   | YES        | General introduction to the bot.                              |
 
 ### `main.py`
