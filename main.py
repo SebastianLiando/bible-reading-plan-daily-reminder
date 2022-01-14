@@ -1,7 +1,8 @@
 import telegram
+from data.subscriber_repository import SubscriptionItem
 from telegram_bot.env import TOKEN
 from google.cloud import firestore
-from telegram_bot.utils import get_message_for_today, get_subscribers
+from telegram_bot.utils import get_message_for_today, get_subscribers_chat_ids
 
 
 def main():
@@ -12,7 +13,7 @@ def main():
     telegram_message = get_message_for_today(db)
 
     # Get all subscribers
-    subscribers = get_subscribers(db)
+    subscribers = get_subscribers_chat_ids(SubscriptionItem.BIBLE_READING_PLAN)
 
     # Exit if there are no subscribers
     if len(subscribers) == 0:

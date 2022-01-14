@@ -57,6 +57,14 @@ class SubscriberRepository(FirestoreRepository):
     def _data_class(self):
         return Subscriber
 
+    def list_by_subscription(self, item: SubscriptionItem):
+        snapshots = self.collection.where(
+            'sub_items', 'array_contains', item.value).get()
+            
+        items = map(lambda doc: self._create_from_doc(doc.id, doc.to_dict()),
+                    snapshots)
+        return list(items)
+
     def get(self, id: str):
         doc = self.collection.where('chat_id', '==', id).get()
         if len(doc) == 0:

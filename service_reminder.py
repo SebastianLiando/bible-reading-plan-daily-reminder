@@ -1,16 +1,12 @@
 import telegram
+from data.subscriber_repository import SubscriptionItem
 from eventbrite import get_next_jcc_sermon
 from telegram_bot.env import TOKEN
 from telegram_bot.const import build_service_reminder_message
-from google.cloud import firestore
-
-from telegram_bot.utils import get_subscribers
+from telegram_bot.utils import get_subscribers_chat_ids
 
 
 def main():
-    # Create the database client
-    db = firestore.Client()
-
     # Get service message
     event = get_next_jcc_sermon()
 
@@ -20,7 +16,7 @@ def main():
         message = build_service_reminder_message(event.url)
 
     # Get all subscribers
-    subscribers = get_subscribers(db)
+    subscribers = get_subscribers_chat_ids(SubscriptionItem.SERVICE_REMINDER)
 
     # Exit if there are no subscribers
     if len(subscribers) == 0:
