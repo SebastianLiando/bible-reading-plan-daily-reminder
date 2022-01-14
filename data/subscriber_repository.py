@@ -1,74 +1,85 @@
-from typing import Set
+from typing import Optional, Set
 from google.cloud import firestore
+from enum import Enum, auto, unique
+from dataclasses import dataclass, asdict
+
+from data.firestore_repository import FirestoreRepository
 
 
-CHAT_ID = 'chat_id'
+@unique
+class SubscriptionItem(Enum):
+    BIBLE_READING_PLAN = auto()
+    SERVICE_REMINDER = auto()
 
 
-class SubscriberRepository:
+@dataclass(frozen=True, eq=True)
+class Subscriber:
+    id: str
+    chat_id: str
+    sub_items: Set[SubscriptionItem]
+
+    def is_subscribed_to(self, item: SubscriptionItem) -> bool:
+        return item in self.sub_items
+
+    def subscribe(self, item: SubscriptionItem):
+        self.sub_items.add(item)
+
+    def unsubscribe(self, item: SubscriptionItem):
+        self.sub_items.remove(item)
+
+    @staticmethod
+    def from_json(json: dict):
+        return Subscriber(
+            id=json['id'],
+            chat_id=json['chat_id'],
+            sub_items=set(
+                map(lambda value: SubscriptionItem(value), json['sub_items']))
+        )
+
+    def to_json(self):
+        as_dict = asdict(self)
+        # Convert enum to value
+        as_dict['sub_items'] = list(
+            map(lambda e: e.value, as_dict['sub_items']))
+
+        return as_dict
+
+
+class SubscriberRepository(FirestoreRepository):
     """
     This class is used to retrieve and persists subscriber data to the firestore database.
     """
 
-    def __init__(self, db: firestore.Client) -> None:
-        self.db = db
-        self.collection = db.collection('subscribers')
+    def __init__(self, db: Optional[firestore.Client] = None) -> None:
+        client = db if db is not None else firestore.Client()
+        super().__init__('subscribers', client)
 
-    def _get_chat_id_from_doc(self, doc: firestore.DocumentSnapshot) -> str:
-        """Returns the chat id from a firestore document.
+    def _data_class(self):
+        return Subscriber
 
-        Args:
-            doc (firestore.DocumentSnapshot): The firestore document.
-
-        Returns:
-            str: The chat id
-        """
-        data = doc.to_dict()
-        return data[CHAT_ID]
-
-    def get_subscribers(self) -> Set[str]:
-        """Get all the subscribers' chat id.
-
-        Returns:
-            Set[str]: All chat ids of the subscriber.
-        """
-        subscribers_list = self.collection.get()
-        chat_ids = map(self._get_chat_id_from_doc, subscribers_list)
-
-        return set(chat_ids)
-
-    def add_subscriber(self, chat_id: str):
-        """Adds a subscriber to the database.
-
-        Args:
-            chat_id (str): The subscriber's chat id to add.
-        """
-        data = {
-            CHAT_ID: chat_id
-        }
-
-        if not self.is_subscribed(chat_id):
-            self.collection.add(data)
-
-    def is_subscribed(self, chat_id: str) -> bool:
-        documents = self.collection.where(CHAT_ID, '==', chat_id).get()
-
-        doc = list(documents)
-
+    def get(self, id: str):
+        doc = self.collection.where('chat_id', '==', id).get()
         if len(doc) == 0:
-            return False
+            return None
+
+        doc = doc[0]
+        return super()._create_from_doc(doc.id, doc.to_dict())
+
+    def is_subscribed(self, chat_id: str, item: SubscriptionItem) -> bool:
+        doc = self.get(chat_id)
+        return (doc is not None) and (item in doc.sub_items)
+
+    def toggle_subscription(self, chat_id: str, item: SubscriptionItem):
+        subscriber = self.get(chat_id)
+
+        # Create a new subscriber if doesn't exist in database.
+        if subscriber is None:
+            subscriber = Subscriber(id='', chat_id=chat_id, sub_items=set())
+
+        is_subbed = subscriber.is_subscribed_to(item)
+        if is_subbed:
+            subscriber.unsubscribe(item)
         else:
-            return True
+            subscriber.subscribe(item)
 
-    def remove_subscriber(self, chat_id: str):
-        """Removes a subscriber from the database. If the subscriber doesn't exist, this operation
-        does nothing.
-
-        Args:
-            chat_id (str): The subscriber's chat id to remove.
-        """
-        documents = self.collection.where(CHAT_ID, '==', chat_id).get()
-
-        for doc in documents:
-            ref: firestore.DocumentReference = doc.reference
-            ref.delete()
+        return super().save(subscriber)

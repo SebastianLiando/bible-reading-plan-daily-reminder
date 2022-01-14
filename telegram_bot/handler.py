@@ -1,9 +1,11 @@
+import json
 from telegram.constants import PARSEMODE_HTML
+from data.subscriber_repository import SubscriptionItem
 from eventbrite import get_next_jcc_sermon
 from telegram_bot.const import CALLBACK_DATA_CANCEL, LABEL_CANCEL_OPERATION, build_service_reminder_message, build_subscription_change_message
 from telegram import Update
 from telegram.ext import CallbackContext
-from telegram_bot.handler_utils import toggle_subscription, is_sender_authorized, reply_authorized, reply_unauthorized
+from telegram_bot.handler_utils import toggle_subscription, is_sender_authorized, reply_authorized_start, reply_unauthorized_start
 from telegram_bot.utils import get_message_for_today
 from google.cloud import firestore
 
@@ -20,9 +22,9 @@ def on_command_start(update: Update, _: CallbackContext):
     chat_id = update.effective_chat.id
 
     if is_sender_authorized(update.effective_chat, update.effective_user):
-        reply_authorized(chat_id, update)
+        reply_authorized_start(chat_id, update)
     else:
-        reply_unauthorized(chat_id, update)
+        reply_unauthorized_start(chat_id, update)
 
 
 def on_command_today(update: Update, _: CallbackContext):
@@ -86,15 +88,19 @@ def on_subscription_change(update: Update, _: CallbackContext):
     query = update.callback_query
 
     # Get the data send by the inline keyboard.
-    chat_id = query.data
+    callback_data = query.data
 
     # If the user cancels the operation.
-    if (chat_id == CALLBACK_DATA_CANCEL):
+    if (callback_data == CALLBACK_DATA_CANCEL):
         query.edit_message_text(text=LABEL_CANCEL_OPERATION)
         return
 
     # Else, modify the subscription for the given chat id.
-    subscribed = toggle_subscription(chat_id)
+    callback_data = json.loads(callback_data)
+    chat_id = callback_data['chat_id']
+    sub_item = SubscriptionItem(callback_data['sub_item'])
+
+    subscribed = toggle_subscription(chat_id, sub_item)
 
     # Notify that the user has changed the subscription
     reply = build_subscription_change_message(subscribed)

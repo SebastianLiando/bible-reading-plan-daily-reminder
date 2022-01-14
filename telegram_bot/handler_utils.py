@@ -4,31 +4,21 @@ from telegram.inline.inlinekeyboardbutton import InlineKeyboardButton
 from telegram.inline.inlinekeyboardmarkup import InlineKeyboardMarkup
 from telegram.user import User
 from telegram_bot.const import BUTTON_CANCEL, CALLBACK_DATA_CANCEL, build_button_label, build_start_message
-from data.subscriber_repository import SubscriberRepository
-from google.cloud.firestore import Client
+from data.subscriber_repository import SubscriberRepository, SubscriptionItem
 from telegram import Update
+import json
 
-db = Client()
-repo = SubscriberRepository(db)
-
-
-def _is_user_subscribed(id) -> bool:
-    return repo.is_subscribed(str(id))
+repo = SubscriberRepository()
 
 
-def toggle_subscription(id: str) -> bool:
-    subscribed = _is_user_subscribed(id)
-
-    if not subscribed:
-        repo.add_subscriber(id)
-    else:
-        repo.remove_subscriber(id)
-
-    return not subscribed
+def toggle_subscription(id: str, item: SubscriptionItem) -> bool:
+    updated = repo.toggle_subscription(id, item)
+    return updated.is_subscribed_to(item)
 
 
-def reply_unauthorized(chat_id: str, update: Update):
-    subscribed = _is_user_subscribed(chat_id)
+def reply_unauthorized_start(chat_id: str, update: Update):
+    subscribed = repo.is_subscribed(chat_id,
+                                    SubscriptionItem.BIBLE_READING_PLAN)
 
     message = build_start_message(subscribed, authorized=False)
 
@@ -38,13 +28,15 @@ def reply_unauthorized(chat_id: str, update: Update):
     )
 
 
-def reply_authorized(chat_id: str, update: Update):
-    subscribed = _is_user_subscribed(chat_id)
+def reply_authorized_start(chat_id: str, update: Update):
+    subscribed = repo.is_subscribed(chat_id,
+                                    SubscriptionItem.BIBLE_READING_PLAN)
     button_label = build_button_label(subscribed)
 
     subscription_button = InlineKeyboardButton(
         text=button_label,
-        callback_data=str(chat_id)
+        callback_data=json.dumps(
+            {'chat_id': chat_id, 'sub_item': SubscriptionItem.BIBLE_READING_PLAN.value})
     )
 
     cancel_button = InlineKeyboardButton(
