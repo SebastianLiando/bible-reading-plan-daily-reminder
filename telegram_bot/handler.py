@@ -87,6 +87,12 @@ def on_message(update: Update, callback: CallbackContext):
 def on_subscription_change(update: Update, _: CallbackContext):
     query = update.callback_query
 
+    # Check authorized
+    if not is_sender_authorized(update.effective_chat, update.effective_user):
+        print('Tried to be modified by unauthorized user! Ignoring action')
+        query.answer()
+        return
+
     # Get the data send by the inline keyboard.
     callback_data = query.data
 
