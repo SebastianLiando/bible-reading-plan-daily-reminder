@@ -1,6 +1,6 @@
 from telegram.constants import PARSEMODE_HTML
-from eventbrite import FALLBACK_URL, get_next_jcc_sermon, _build_eventbrite_url
-from telegram_bot.const import CALLBACK_DATA_CANCEL, LABEL_CANCEL_OPERATION, build_service_reminder, build_subscription_change_message
+from eventbrite import get_next_jcc_sermon
+from telegram_bot.const import CALLBACK_DATA_CANCEL, LABEL_CANCEL_OPERATION, build_service_reminder_message, build_subscription_change_message
 from telegram import Update
 from telegram.ext import CallbackContext
 from telegram_bot.handler_utils import toggle_subscription, is_sender_authorized, reply_authorized, reply_unauthorized
@@ -48,9 +48,9 @@ def on_command_sermon(update: Update, _: CallbackContext):
         event = get_next_jcc_sermon()
 
         if event is None:
-            message = build_service_reminder(None)
+            message = build_service_reminder_message(None)
         else:
-            message = build_service_reminder(event.url)
+            message = build_service_reminder_message(event.url)
 
         update.effective_chat.send_message(
             message,
