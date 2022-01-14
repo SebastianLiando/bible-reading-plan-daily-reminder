@@ -3,7 +3,7 @@ from datetime import date, datetime
 from typing import Optional, Set
 from google.cloud import firestore
 
-from data.subscriber_repository import SubscriberRepository
+from data.subscriber_repository import SubscriberRepository, SubscriptionItem
 from data.plan_repository import PlanRepository
 from bible.plan_manager import ReadingTask
 from telegram_bot.daily_message_manager import TaskMessageManager
@@ -50,18 +50,21 @@ def get_today_reading_plan(db: firestore.Client) -> Optional[ReadingTask]:
     return plan_repo.get_plan_at(today_date)
 
 
-def get_subscribers(db: firestore.Client) -> Set[str]:
-    """Returns subscriber ids from firestore.
+def get_subscribers_chat_ids(item: SubscriptionItem) -> Set[str]:
+    """Returns subscriber ids from firestore for the given item..
 
     Args:
-        db (firestore.Client): The firestore client.
+        item (SubscriptionItem): Which subscription the chat should be subscribed to.
 
     Returns:
         Set[str]: Subscribers' telegram chat ids.
     """
-    repo = SubscriberRepository(db)
+    repo = SubscriberRepository()
+    subs = repo.list_by_subscription(item)
 
-    return repo.get_subscribers()
+    ids = map(lambda sub: sub.chat_id, subs)
+
+    return set(ids)
 
 
 def format_telegram_message(task: ReadingTask, body: str) -> str:
