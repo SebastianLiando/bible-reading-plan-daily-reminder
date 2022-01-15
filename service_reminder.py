@@ -1,3 +1,4 @@
+from datetime import datetime
 import telegram
 from data.subscriber_repository import SubscriptionItem
 from eventbrite import get_next_jcc_sermon
@@ -6,7 +7,16 @@ from telegram_bot.const import build_service_reminder_message
 from telegram_bot.utils import get_subscribers_chat_ids
 
 
+def is_saturday(datetime: datetime) -> bool:
+    return datetime.isoweekday() == 6
+
+
 def main():
+    # Ignore script if today is not Saturday
+    today = datetime.now()
+    if not is_saturday(today):
+        return
+
     # Get service message
     event = get_next_jcc_sermon()
 
