@@ -98,11 +98,25 @@ def get_event_on(date: datetime, org_id: str = JCC_ORG_ID) -> Optional[Eventbrit
     return None
 
 
-def get_next_jcc_sermon():
-    # Get datetime of the coming sunday
-    next_sunday = datetime.now()
-    while datetime.strftime(next_sunday, '%a') != 'Sun':
-        next_sunday = next_sunday + timedelta(days=1)
+def _next_sunday_of(dt: datetime) -> datetime:
+    """Get the next coming Sunday. If today is Sunday, get the next week's Sunday instead.
+
+    Args:
+        dt (datetime): The starting datetime.
+
+    Returns:
+        datetime: The datetime of the next coming Sunday.
+    """
+    result = datetime.fromtimestamp(dt.timestamp())  # Make a copy
+
+    while result.isoweekday() != 7 or result.date() == dt.date():
+        result = result + timedelta(days=1)
+
+    return result
+
+
+def get_next_jcc_service() -> EventbriteEvent:
+    next_sunday = _next_sunday_of(datetime.now())
 
     event = get_event_on(next_sunday)
     return event

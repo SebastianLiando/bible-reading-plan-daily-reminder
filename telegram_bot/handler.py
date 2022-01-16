@@ -1,7 +1,7 @@
 import json
 from telegram.constants import PARSEMODE_HTML
 from data.subscriber_repository import SubscriptionItem
-from eventbrite import get_next_jcc_sermon
+from eventbrite import get_next_jcc_service
 from telegram_bot.const import CALLBACK_DATA_CANCEL, HELP_MESSAGE, LABEL_CANCEL_OPERATION, build_service_reminder_message, build_subscription_change_message
 from telegram import Update
 from telegram.ext import CallbackContext
@@ -47,7 +47,7 @@ def on_command_today(update: Update, _: CallbackContext):
 
 def on_command_service(update: Update, _: CallbackContext):
     if is_sender_authorized(update.effective_chat, update.effective_user):
-        event = get_next_jcc_sermon()
+        event = get_next_jcc_service()
 
         if event is None:
             message = build_service_reminder_message(None)
