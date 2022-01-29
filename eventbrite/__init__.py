@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+import json
+import re
 from typing import List, Optional
 import requests
 from bs4 import BeautifulSoup
@@ -7,13 +9,6 @@ from bs4.element import Tag
 
 FALLBACK_URL = 'https://tinyurl.com/jcceng'
 JCC_ORG_ID = 'jcc-english-30621951616'
-
-UPCOMING_SECT_SELECTOR = 'div [data-testid="organizer-profile__future-events"]'
-EVENT_ITEM_SELECTOR = 'div.eds-event-card-content__primary-content'
-
-ANCHOR_SELECTOR = 'a'
-CONTENT_SUB_SELECTOR = 'div.eds-event-card-content__sub-title'
-FORMATTED_NAME_SELECTOR = 'div.eds-is-hidden-accessible'
 
 DATETIME_FORMAT = "%a, %b %d, %H:%M"
 
@@ -34,46 +29,61 @@ class EventbriteEvent:
         return datetime.strftime(self.date_time, DATETIME_FORMAT)
 
 
-def _parse_event_time(event_time: str) -> datetime:
-    parsed = datetime.strptime(event_time, DATETIME_FORMAT)
+def _parse_event_json(json: dict) -> EventbriteEvent:
+    name = json['name']['text']
+    url = json['url']
+    date_time = datetime.fromisoformat(json['start']['local'])
 
-    # Determine the year
-    now = datetime.now()
-
-    # Check if the date and month is before or after today.
-    # If it is today or after, then the event happens this year.
-    if parsed.month > now.month or parsed.month == now.month and parsed.day >= now.day:
-        parsed = parsed.replace(year=now.year)
-    else:
-        parsed = parsed.replace(year=now.year + 1)
-
-    return parsed
+    return EventbriteEvent(name=name, url=url, date_time=date_time)
 
 
-def _parse_event(primary_div: Tag) -> EventbriteEvent:
-    anchor = primary_div.select_one(ANCHOR_SELECTOR)
-    formatted_name = anchor.select_one(FORMATTED_NAME_SELECTOR)
-    sub_div = primary_div.select_one(CONTENT_SUB_SELECTOR)
+def _get_server_data(script_section: Tag) -> dict:
+    """Parse the server data json from the script.
 
-    return EventbriteEvent(
-        name=formatted_name.text,
-        url=anchor.attrs['href'],
-        date_time=_parse_event_time(sub_div.text)
-    )
+    Args:
+        script_section (Tag): The `<script>` containing server data.
+
+    Raises:
+        ValueError: If there is no server data found.
+
+    Returns:
+        dict: The server data json object.
+    """
+    content = script_section.text.split(';')
+
+    index = -1
+    for i, c in enumerate(content):
+        if 'SERVER_DATA' in c:
+            index = i
+
+    if index == -1:
+        raise ValueError('Server data cannot be found!')
+
+    server_data_line = content[index].strip()
+    server_data_json = re.match(
+        '^window.__SERVER_DATA__ = (.+)$', server_data_line).group(1)
+    server_data_json = json.loads(server_data_json)
+
+    return server_data_json
 
 
 def _get_upcoming_events(html: str) -> List[EventbriteEvent]:
     soup = BeautifulSoup(html, 'html.parser')
-    upcoming_section = soup.select_one(UPCOMING_SECT_SELECTOR)
-    upcoming_items = upcoming_section.select(EVENT_ITEM_SELECTOR)
 
-    result = set()
+    # Find server data in the source code.
+    # This is found in window.__SERVER_DATA__ inside on of the <script>
+    scripts = soup.select('script')
+    server_data = None
+    for script in scripts:
+        if 'window.__SERVER_DATA__' in script.text:
+            server_data = _get_server_data(script)
 
-    for event_div in upcoming_items:
-        event = _parse_event(event_div)
-        result.add(event)
+    if server_data is None:
+        raise ValueError('Cannot find server data!')
 
-    return list(result)
+    future_events = server_data['view_data']['events']['future_events']
+    future_events = set(map(_parse_event_json, future_events))
+    return list(future_events)
 
 
 def _build_eventbrite_url(org_id: str) -> str:
@@ -92,7 +102,7 @@ def get_future_events(org_id: str) -> List[EventbriteEvent]:
 def get_event_on(date: datetime, org_id: str = JCC_ORG_ID) -> Optional[EventbriteEvent]:
     events = get_future_events(org_id)
     for event in events:
-        if event.date_time.day == date.day and event.date_time.month == date.month:
+        if event.date_time.date() == date.date():
             return event
 
     return None
