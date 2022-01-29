@@ -6,17 +6,9 @@ from typing import List, Optional
 import requests
 from bs4 import BeautifulSoup
 from bs4.element import Tag
-from websockets import serve
 
 FALLBACK_URL = 'https://tinyurl.com/jcceng'
 JCC_ORG_ID = 'jcc-english-30621951616'
-
-UPCOMING_SECT_SELECTOR = 'div [data-testid="organizer-profile__future-events"]'
-EVENT_ITEM_SELECTOR = 'div.eds-event-card-content__primary-content'
-
-ANCHOR_SELECTOR = 'a'
-CONTENT_SUB_SELECTOR = 'div.eds-event-card-content__sub-title'
-FORMATTED_NAME_SELECTOR = 'div.eds-is-hidden-accessible'
 
 DATETIME_FORMAT = "%a, %b %d, %H:%M"
 
@@ -88,7 +80,7 @@ def _get_upcoming_events(html: str) -> List[EventbriteEvent]:
 
     if server_data is None:
         raise ValueError('Cannot find server data!')
-    
+
     future_events = server_data['view_data']['events']['future_events']
     future_events = set(map(_parse_event_json, future_events))
     return list(future_events)
