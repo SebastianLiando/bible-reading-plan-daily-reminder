@@ -101,7 +101,6 @@ def get_message_for_today(db: firestore.Client, message_manager: TaskMessageMana
 
     # If there is no plan for today, the task ends
     if task_today is None:
-        print('No task for today.')
         return None
 
     # Get the content for today
