@@ -6,6 +6,7 @@ from google.cloud import firestore
 from data.subscriber_repository import SubscriberRepository, SubscriptionItem
 from data.plan_repository import PlanRepository
 from bible.plan_manager import ReadingTask
+from bible.bible_gateway import BibleGateway
 from telegram_bot.daily_message_manager import TaskMessageManager
 
 
@@ -75,12 +76,18 @@ def format_telegram_message(task: ReadingTask, body: str) -> str:
     reading_chapter = f'{task.book.upper()} {task.chapter}'
     reading_plan = f'📖 <b>{reading_chapter}</b>'
 
+    # Credit link to Bible Gateway
+    source_url = BibleGateway().get_url(task.book, task.chapter)
+    credit_section = f'See from source: <a href="{source_url}">Bible Gateway</a>'
+
     # The message lines to be sent.
     message_lines = [
         today_date,
         reading_plan,
         '\n',
         body,
+        '\n',
+        credit_section,
     ]
 
     return '\n'.join(message_lines)
@@ -101,7 +108,6 @@ def get_message_for_today(db: firestore.Client, message_manager: TaskMessageMana
 
     # If there is no plan for today, the task ends
     if task_today is None:
-        print('No task for today.')
         return None
 
     # Get the content for today

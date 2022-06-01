@@ -12,8 +12,13 @@ def main():
     # Get today's message
     telegram_message = get_message_for_today(db)
 
+    if telegram_message is None:
+        print('No reading task for today.')
+        return
+
     # Get all subscribers
-    subscribers = get_subscribers_chat_ids(SubscriptionItem.PULSE_BIBLE_READING_PLAN)
+    subscribers = get_subscribers_chat_ids(
+        SubscriptionItem.PULSE_BIBLE_READING_PLAN)
 
     # Exit if there are no subscribers
     if len(subscribers) == 0:
