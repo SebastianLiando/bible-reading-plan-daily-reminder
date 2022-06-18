@@ -3,6 +3,12 @@ from data.subscriber_repository import SubscriptionItem
 from telegram_bot.env import TOKEN
 from google.cloud import firestore
 from telegram_bot.utils import get_message_for_today, get_subscribers_chat_ids
+from discord_bot import ReportBot, DISCORD_BOT_TOKEN
+
+
+def report_to_discord(success: bool, message: str):
+    bot = ReportBot(success=success, message=message)
+    bot.run(DISCORD_BOT_TOKEN)
 
 
 def main():
@@ -14,6 +20,7 @@ def main():
 
     if telegram_message is None:
         print('No reading task for today.')
+        report_to_discord(True, 'No reading task.')
         return
 
     # Get all subscribers
@@ -29,18 +36,23 @@ def main():
     bot = telegram.Bot(token=TOKEN)
 
     # Send the message to all subscribers
-    for chat_id in subscribers:
-        # Send message every 4000 characters, this is telegram's limitation.
-        for i in range(0, len(telegram_message), 4000):
-            sub_message = telegram_message[i:i+4000]
+    try:
+        for chat_id in subscribers:
+            # Send message every 4000 characters, this is telegram's limitation.
+            for i in range(0, len(telegram_message), 4000):
+                sub_message = telegram_message[i:i+4000]
 
-            bot.send_message(
-                chat_id=chat_id,
-                text=sub_message,
-                parse_mode=telegram.ParseMode.HTML
-            )
+                bot.send_message(
+                    chat_id=chat_id,
+                    text=sub_message,
+                    parse_mode=telegram.ParseMode.HTML
+                )
 
-    print(f'Successfully sent messages to {len(subscribers)} subscriber(s)')
+        print(
+            f'Successfully sent messages to {len(subscribers)} subscriber(s)')
+        report_to_discord(True, "Reading task successfully sent.")
+    except Exception as e:
+        report_to_discord(False, f"Error in sending reading task: {e}")
 
 
 if __name__ == "__main__":
