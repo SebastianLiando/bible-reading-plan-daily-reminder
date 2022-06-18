@@ -10,11 +10,12 @@ A multipurpose telegram bot for reminders on Jurong Christian Church, such as se
 
 These are the required environment variables.
 
-| Name         | Description                                                                                                |
-| ------------ | ---------------------------------------------------------------------------------------------------------- |
-| BOT_BASE_URL | The webhook URL of the bot.                                                                                |
-| BOT_TOKEN    | The token of the bot to be used.                                                                           |
-| BOT_WEBHOOK  | Set this to `true` if the bot should run using webhook. If set to `false`, the bot will run using polling. |
+| Name              | Description                                                                                                |
+| ----------------- | ---------------------------------------------------------------------------------------------------------- |
+| BOT_BASE_URL      | The webhook URL of the bot.                                                                                |
+| BOT_TOKEN         | The token of the bot to be used.                                                                           |
+| DISCORD_BOT_TOKEN | The token for the discord bot used to report status                                                        |
+| BOT_WEBHOOK       | Set this to `true` if the bot should run using webhook. If set to `false`, the bot will run using polling. |
 
 ### Google Application Credentials
 
@@ -37,7 +38,7 @@ This script starts the telegram bot. The bot currently has 3 available commands.
 
 This script sends today's reading plan to every subscriber. This is the script should run in a cron job.
 
-### `service_reminder.py`
+### (Deprecated) `service_reminder.py`
 
 This script sends Evenbrite registration reminder to every subscriber. This is the script should run in a cron job.
 
