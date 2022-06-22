@@ -2,6 +2,7 @@ import telegram
 from data.subscriber_repository import SubscriptionItem
 from telegram_bot.env import TOKEN
 from google.cloud import firestore
+from telegram_bot.message import split_html_message
 from telegram_bot.utils import get_message_for_today, get_subscribers_chat_ids
 from discord_bot import ReportBot, DISCORD_BOT_TOKEN
 
@@ -36,15 +37,13 @@ def main():
     bot = telegram.Bot(token=TOKEN)
 
     # Send the message to all subscribers
+    message_parts = split_html_message(telegram_message)
     try:
         for chat_id in subscribers:
-            # Send message every 4000 characters, this is telegram's limitation.
-            for i in range(0, len(telegram_message), 4000):
-                sub_message = telegram_message[i:i+4000]
-
+            for part in message_parts:
                 bot.send_message(
                     chat_id=chat_id,
-                    text=sub_message,
+                    text=part,
                     parse_mode=telegram.ParseMode.HTML
                 )
 
