@@ -77,6 +77,9 @@ class ReadingTask:
     def __str__(self) -> str:
         return str(self.to_dict())
 
+    def __repr__(self) -> str:
+        return str(self.to_dict())
+
 
 class PlanManager:
     def __init__(self, plans: List[List[str]]) -> None:
