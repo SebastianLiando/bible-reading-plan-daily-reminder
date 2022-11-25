@@ -5,11 +5,12 @@ from telegram.inline.inlinekeyboardbutton import InlineKeyboardButton
 from telegram.inline.inlinekeyboardmarkup import InlineKeyboardMarkup
 from telegram.user import User
 from telegram_bot.const import BUTTON_CANCEL, CALLBACK_DATA_CANCEL, build_button_label, build_start_message
+from data import db
 from data.subscriber_repository import Subscriber, SubscriberRepository, SubscriptionItem
 from telegram import Update
 import json
 
-repo = SubscriberRepository()
+repo = SubscriberRepository(db)
 
 
 def toggle_subscription(id: str, item: SubscriptionItem) -> bool:

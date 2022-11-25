@@ -1,5 +1,7 @@
 import os
+import json
 from dotenv import load_dotenv
+from google.oauth2 import service_account
 
 load_dotenv()
 
@@ -26,3 +28,7 @@ if GOOGLE_SHEET_TASK_HEADERS is None:
                                  'Day 3', 'Day 4', 'Day 5', 'Day 6', 'Day 7', 'Remarks']
 else:
     GOOGLE_SHEET_TASK_HEADERS = GOOGLE_SHEET_TASK_HEADERS.split(",")
+
+# Firebase admin SDK credentials
+_CREDENTIALS_JSON = json.loads(os.environ['GOOGLE_APPLICATION_CREDENTIALS_JSON'])
+CREDENTIALS = service_account.Credentials.from_service_account_info(_CREDENTIALS_JSON)

@@ -10,18 +10,15 @@ A multipurpose telegram bot for reminders on Jurong Christian Church, such as se
 
 These are the required environment variables.
 
-| Name                      | Description                                                                                                |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| BOT_BASE_URL              | The webhook URL of the bot.                                                                                |
-| BOT_TOKEN                 | The token of the bot to be used.                                                                           |
-| DISCORD_BOT_TOKEN         | The token for the discord bot used to report status                                                        |
-| BOT_WEBHOOK               | Set this to `true` if the bot should run using webhook. If set to `false`, the bot will run using polling. |
-| GOOGLE_SHEET_TASK_URL     | Bible reading plan google sheet url.                                                                       |
-| GOOGLE_SHEET_TASK_HEADERS | Bible reading plan google sheet table headers to verify the CSV structure.                                 |
-
-### Google Application Credentials
-
-This project uses Firebase as the backend service. Ensure that the deployment environment has been setup for Firebase.
+| Name                                | Description                                                                                                |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| BOT_BASE_URL                        | The webhook URL of the bot.                                                                                |
+| BOT_TOKEN                           | The token of the bot to be used.                                                                           |
+| DISCORD_BOT_TOKEN                   | The token for the discord bot used to report status                                                        |
+| BOT_WEBHOOK                         | Set this to `true` if the bot should run using webhook. If set to `false`, the bot will run using polling. |
+| GOOGLE_SHEET_TASK_URL               | Bible reading plan google sheet url.                                                                       |
+| GOOGLE_SHEET_TASK_HEADERS           | Bible reading plan google sheet table headers to verify the CSV structure.                                 |
+| GOOGLE_APPLICATION_CREDENTIALS_JSON | The service account JSON content to access database.                                                       |
 
 ## Scripts
 

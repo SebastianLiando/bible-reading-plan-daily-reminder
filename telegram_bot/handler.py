@@ -1,5 +1,6 @@
 import json
 from telegram.constants import PARSEMODE_HTML
+from data import db
 from data.subscriber_repository import SubscriptionItem
 from eventbrite import get_next_jcc_service
 from telegram_bot.const import CALLBACK_DATA_CANCEL, HELP_MESSAGE, LABEL_CANCEL_OPERATION, build_service_reminder_message, build_subscription_change_message
@@ -35,7 +36,6 @@ def on_command_today(update: Update, _: CallbackContext):
         _ (CallbackContext): The context object.
     """
     if is_sender_authorized(update.effective_chat, update.effective_user):
-        db = firestore.Client()
         todays_content = get_message_for_today(db)
 
         for i in range(0, len(todays_content), 4000):

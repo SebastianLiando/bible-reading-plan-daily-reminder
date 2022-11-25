@@ -1,4 +1,5 @@
 import telegram
+from data import db
 from data.subscriber_repository import SubscriptionItem
 from config.env import TOKEN
 from google.cloud import firestore
@@ -13,9 +14,6 @@ def report_to_discord(success: bool, message: str):
 
 
 def main():
-    # Create the database client
-    db = firestore.Client()
-
     # Get today's message
     telegram_message = get_message_for_today(db)
 

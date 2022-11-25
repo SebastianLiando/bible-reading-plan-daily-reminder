@@ -7,10 +7,8 @@ class FirestoreRepository:
     This class is an abstract class, so instantiate one of the subclasses of this class instead.
     """
 
-    def __init__(self, collection_name, client: firestore.Client = None) -> None:
-        db = client if client is not None else firestore.Client()
-
-        self.collection = db.collection(collection_name)
+    def __init__(self, collection_name, client: firestore.Client) -> None:
+        self.collection = client.collection(collection_name)
 
     def _data_class(self):
         """Returns the object type that the repository is dealing with."""
