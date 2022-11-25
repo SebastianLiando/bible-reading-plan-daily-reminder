@@ -5,7 +5,7 @@ from io import StringIO
 from google.cloud import firestore
 from bible.bible import Bible
 from data.plan_repository import PlanRepository
-from telegram_bot.env import GOOGLE_SHEET_TASK_URL, GOOGLE_SHEET_TASK_HEADERS
+from config.env import GOOGLE_SHEET_TASK_URL, GOOGLE_SHEET_TASK_HEADERS
 
 from schedule.schedule_parser import ScheduleParser
 
@@ -33,7 +33,7 @@ def main():
     today = datetime.now()
     print(f'Retrieving tasks from {today.date()} onwards.')
     tasks = schedule_parser.get_tasks(start_date=today)
-
+    
     print(f'Uploading {len(tasks)} tasks.')
     db = firestore.Client()
     task_repo = PlanRepository(db)

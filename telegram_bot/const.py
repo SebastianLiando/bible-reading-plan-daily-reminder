@@ -1,7 +1,7 @@
 from typing import Optional
 from data.subscriber_repository import Subscriber, SubscriptionItem
 from eventbrite import FALLBACK_URL
-from telegram_bot.env import BASE_URL, PORT
+from config.env import BASE_URL, PORT
 from telegram_bot.bot_manager import BotWebhookSettings
 
 

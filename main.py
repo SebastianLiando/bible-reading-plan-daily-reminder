@@ -1,6 +1,6 @@
 import telegram
 from data.subscriber_repository import SubscriptionItem
-from telegram_bot.env import TOKEN
+from config.env import TOKEN
 from google.cloud import firestore
 from telegram_bot.message import split_html_message
 from telegram_bot.utils import get_message_for_today, get_subscribers_chat_ids
