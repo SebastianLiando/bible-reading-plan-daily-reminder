@@ -42,7 +42,7 @@ def main():
     for task in tasks:
         task_repo.upsert_plan(task)
         i += 1
-        print(f'\r{i} / {len(tasks)}', end='')
+        print(task)
 
     print()
     print('Upload task complete!')
