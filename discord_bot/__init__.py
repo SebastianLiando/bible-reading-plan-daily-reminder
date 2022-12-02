@@ -1,12 +1,11 @@
 from datetime import datetime
 import discord
 import os
+from config.env import CHANNEL_NAME, DISCORD_BOT_TOKEN
 
 COLOR_SUCCESS = 0x00FF00
 COLOR_ERROR = 0xFF0000
 
-CHANNEL_NAME = 'pulse-bible'
-DISCORD_BOT_TOKEN = os.environ['DISCORD_BOT_TOKEN']
 
 def today_date_str() -> str:
     return datetime.now().strftime('%d %b %Y')

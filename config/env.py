@@ -2,6 +2,7 @@ import os
 import json
 from dotenv import load_dotenv
 from google.oauth2 import service_account
+from enum import Enum
 
 load_dotenv()
 
@@ -32,3 +33,20 @@ else:
 # Firebase admin SDK credentials
 _CREDENTIALS_JSON = json.loads(os.environ['GOOGLE_APPLICATION_CREDENTIALS_JSON'])
 CREDENTIALS = service_account.Credentials.from_service_account_info(_CREDENTIALS_JSON)
+
+
+class LambdaTask(Enum):
+    SEND_READING = 'SEND_READING'
+    '''Send reading based on the schedule.'''
+
+    UPDATE_SCHEDULE = 'UPDATE_SCHEDULE'
+    '''Read the schedule file and update the database.'''
+
+LAMBDA_TASK = LambdaTask(os.environ['LAMBDA_TASK'])
+'''
+The task that the AWS lambda handler should execute.
+'''
+
+# ----------- Discord Reporting
+CHANNEL_NAME = os.environ.get('DISCORD_CHANNEL','pulse-bible')
+DISCORD_BOT_TOKEN = os.environ['DISCORD_BOT_TOKEN']
