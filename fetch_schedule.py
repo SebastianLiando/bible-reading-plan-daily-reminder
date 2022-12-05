@@ -36,12 +36,10 @@ def main():
     tasks = schedule_parser.get_tasks(start_date=today)
 
     print(f'Uploading {len(tasks)} tasks.')
-    
+
     task_repo = PlanRepository(db)
-    i = 0
     for task in tasks:
         task_repo.upsert_plan(task)
-        i += 1
         print(task)
 
     print()

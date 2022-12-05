@@ -19,6 +19,8 @@ These are the required environment variables.
 | GOOGLE_SHEET_TASK_URL               | Bible reading plan google sheet url.                                                                       |
 | GOOGLE_SHEET_TASK_HEADERS           | Bible reading plan google sheet table headers to verify the CSV structure.                                 |
 | GOOGLE_APPLICATION_CREDENTIALS_JSON | The service account JSON content to access database.                                                       |
+| DISCORD_BOT_TOKEN                   | The token for the discord bot for to report sending task activity status.                                  |
+| LAMBDA_TASK                         | The task to execute when lambda handler is triggered. Valid values: `SEND_READING`, `UPDATE_SCHEDULE`      |
 
 ## Scripts
 
