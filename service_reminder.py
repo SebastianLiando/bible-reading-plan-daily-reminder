@@ -2,7 +2,7 @@ from datetime import datetime
 import telegram
 from data.subscriber_repository import SubscriptionItem
 from eventbrite import get_next_jcc_service
-from telegram_bot.env import TOKEN
+from config.env import TOKEN
 from telegram_bot.const import build_service_reminder_message
 from telegram_bot.utils import get_subscribers_chat_ids
 

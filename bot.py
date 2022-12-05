@@ -2,7 +2,7 @@ from telegram.ext.callbackqueryhandler import CallbackQueryHandler
 from telegram.ext.commandhandler import CommandHandler
 from telegram.ext.filters import Filters
 from telegram.ext.messagehandler import MessageHandler
-from telegram_bot.env import TOKEN, USE_WEBHOOK
+from config.env import TOKEN, USE_WEBHOOK
 from telegram_bot.const import WEBHOOK_SETTINGS
 from telegram_bot.bot_manager import BotManager
 from telegram_bot.handler import commands, on_message, on_subscription_change

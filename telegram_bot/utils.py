@@ -3,6 +3,7 @@ from datetime import date, datetime
 from typing import Optional, Set
 from google.cloud import firestore
 
+from data import db
 from data.subscriber_repository import SubscriberRepository, SubscriptionItem
 from data.plan_repository import PlanRepository
 from bible.plan_manager import ReadingTask
@@ -60,7 +61,7 @@ def get_subscribers_chat_ids(item: SubscriptionItem) -> Set[str]:
     Returns:
         Set[str]: Subscribers' telegram chat ids.
     """
-    repo = SubscriberRepository()
+    repo = SubscriberRepository(db)
     subs = repo.list_by_subscription(item)
 
     ids = map(lambda sub: sub.chat_id, subs)

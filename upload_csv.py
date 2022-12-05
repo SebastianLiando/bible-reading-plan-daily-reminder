@@ -1,5 +1,6 @@
 from assets import get_asset
 from bible.plan_manager import PlanManager
+from data import db
 from data.plan_repository import PlanRepository
 from google.cloud import firestore
 
@@ -24,7 +25,6 @@ plan_manager = PlanManager(rows)
 tasks = plan_manager.get_tasks()
 
 # Create repo
-db = firestore.Client()
 repo = PlanRepository(db)
 
 # Counter

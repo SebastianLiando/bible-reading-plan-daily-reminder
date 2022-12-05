@@ -77,9 +77,8 @@ class SubscriberRepository(FirestoreRepository):
     This class is used to retrieve and persists subscriber data to the firestore database.
     """
 
-    def __init__(self, db: Optional[firestore.Client] = None) -> None:
-        client = db if db is not None else firestore.Client()
-        super().__init__('subscribers', client)
+    def __init__(self, db: firestore.Client) -> None:
+        super().__init__('subscribers', db)
 
     def _data_class(self):
         return Subscriber

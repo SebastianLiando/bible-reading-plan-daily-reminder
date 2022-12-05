@@ -1,10 +1,10 @@
 import telegram
+from data import db
 from data.subscriber_repository import SubscriptionItem
-from telegram_bot.env import TOKEN
-from google.cloud import firestore
+from config.env import TOKEN, DISCORD_BOT_TOKEN
 from telegram_bot.message import split_html_message
 from telegram_bot.utils import get_message_for_today, get_subscribers_chat_ids
-from discord_bot import ReportBot, DISCORD_BOT_TOKEN
+from discord_bot import ReportBot
 
 
 def report_to_discord(success: bool, message: str):
@@ -13,9 +13,6 @@ def report_to_discord(success: bool, message: str):
 
 
 def main():
-    # Create the database client
-    db = firestore.Client()
-
     # Get today's message
     telegram_message = get_message_for_today(db)
 

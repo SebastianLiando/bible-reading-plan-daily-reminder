@@ -4,8 +4,9 @@ import csv
 from io import StringIO
 from google.cloud import firestore
 from bible.bible import Bible
+from data import db
 from data.plan_repository import PlanRepository
-from telegram_bot.env import GOOGLE_SHEET_TASK_URL, GOOGLE_SHEET_TASK_HEADERS
+from config.env import GOOGLE_SHEET_TASK_URL, GOOGLE_SHEET_TASK_HEADERS, CREDENTIALS
 
 from schedule.schedule_parser import ScheduleParser
 
@@ -35,13 +36,11 @@ def main():
     tasks = schedule_parser.get_tasks(start_date=today)
 
     print(f'Uploading {len(tasks)} tasks.')
-    db = firestore.Client()
+
     task_repo = PlanRepository(db)
-    i = 0
     for task in tasks:
         task_repo.upsert_plan(task)
-        i += 1
-        print(f'\r{i} / {len(tasks)}', end='')
+        print(task)
 
     print()
     print('Upload task complete!')
