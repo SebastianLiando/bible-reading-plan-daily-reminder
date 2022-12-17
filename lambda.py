@@ -4,6 +4,8 @@ from fetch_schedule import main as run_fetch_schedule
 
 
 def lambda_handler(event, context):  # NOSONAR
+    print(event)
+
     if LAMBDA_TASK == LambdaTask.SEND_READING:
         print('Running SEND_READING task.')
         run_send_reading()
